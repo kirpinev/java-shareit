@@ -8,15 +8,11 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Data
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
-    @NotBlank
+public class UserDto {
     private Long id;
     @NotBlank
     private String name;

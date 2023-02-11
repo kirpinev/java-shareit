@@ -1,12 +1,11 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.item;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.*;
 
 /**
  * TODO Sprint add-controllers.
@@ -15,12 +14,12 @@ import javax.validation.constraints.NotBlank;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
-    @NotBlank
+public class ItemDto {
     private Long id;
     @NotBlank
     private String name;
-    @Email(regexp = "^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
     @NotBlank
-    private String email;
+    private String description;
+    @NotNull
+    private Boolean available;
 }
