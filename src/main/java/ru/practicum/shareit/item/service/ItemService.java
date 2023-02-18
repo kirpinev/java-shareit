@@ -15,5 +15,5 @@ public interface ItemService {
 
     List<Item> getEntitiesByText(String text);
 
-    Item update(Item item);
+    Item updateById(Item item, Long itemId);
 }

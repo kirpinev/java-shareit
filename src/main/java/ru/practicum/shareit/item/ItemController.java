@@ -53,6 +53,7 @@ public class ItemController {
     public ItemDto getById(@RequestHeader("X-Sharer-User-Id") Long userId,
                            @PathVariable("itemId") Long itemId) {
         userService.getEntityById(userId);
+
         Item item = itemService.getEntityById(itemId);
 
         return itemMapper.toItemDto(item);
@@ -82,7 +83,7 @@ public class ItemController {
         itemFromDto.setId(item.getId());
         itemFromDto.setOwner(user);
 
-        Item updatedItem = itemService.update(itemFromDto);
+        Item updatedItem = itemService.updateById(itemFromDto, itemId);
 
         return itemMapper.toItemDto(updatedItem);
     }

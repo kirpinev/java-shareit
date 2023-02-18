@@ -7,6 +7,8 @@ import ru.practicum.shareit.item.dao.ItemDao;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -43,7 +45,27 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Item update(Item item) {
-        return itemDao.update(item);
+    public Item updateById(Item item, Long itemId) {
+        Optional<Item> itemFromMap = itemDao.getEntityById(itemId);
+
+        if (itemFromMap.isPresent()) {
+            if (Objects.nonNull(item.getName())
+                    && !item.getName().isEmpty() && !item.getName().isBlank()) {
+                itemFromMap.get().setName(item.getName());
+            }
+
+            if (Objects.nonNull(item.getDescription())
+                    && !item.getDescription().isEmpty() && !item.getDescription().isBlank()) {
+                itemFromMap.get().setDescription(item.getDescription());
+            }
+
+            if (Objects.nonNull(item.getAvailable())) {
+                itemFromMap.get().setAvailable(item.getAvailable());
+            }
+
+            return itemDao.updateById(itemFromMap.get(), itemId);
+        }
+
+        return null;
     }
 }

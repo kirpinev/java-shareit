@@ -79,29 +79,12 @@ public class ItemDaoLocalStorage implements ItemDao {
     }
 
     @Override
-    public Item update(Item item) {
+    public Item updateById(Item item, Long itemId) {
         List<Item> items = itemsMap.get(item.getOwner().getId());
-        Optional<Item> itemFromList = items
-                .stream()
-                .filter(item1 -> Objects.equals(item1.getId(), item.getId()))
-                .findFirst();
+        int index = items.indexOf(item);
 
-        itemFromList.ifPresent((item1 -> {
-            if (Objects.nonNull(item.getName())
-                    && !item.getName().isEmpty() && !item.getName().isBlank()) {
-                item1.setName(item.getName());
-            }
+        items.set(index, item);
 
-            if (Objects.nonNull(item.getDescription())
-                    && !item.getDescription().isEmpty() && !item.getDescription().isBlank()) {
-                item1.setDescription(item.getDescription());
-            }
-
-            if (Objects.nonNull(item.getAvailable())) {
-                item1.setAvailable(item.getAvailable());
-            }
-        }));
-
-        return itemFromList.orElse(null);
+        return item;
     }
 }
