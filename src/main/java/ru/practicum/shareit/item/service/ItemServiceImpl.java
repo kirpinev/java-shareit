@@ -65,24 +65,10 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto update(Long userId, Long itemId, ItemDto itemDto) {
         Item item = findByUserIdAndItemId(userId, itemId);
         Item itemFromDto = itemMapper.toItem(itemDto);
-        itemFromDto.setId(item.getId());
-        itemFromDto.setOwner(item.getOwner());
 
-        if (Objects.nonNull(itemFromDto.getName())
-                && !itemFromDto.getName().isEmpty()
-                && !itemFromDto.getName().isBlank()) {
-            item.setName(itemFromDto.getName());
-        }
-
-        if (Objects.nonNull(itemFromDto.getDescription())
-                && !itemFromDto.getDescription().isEmpty()
-                && !itemFromDto.getDescription().isBlank()) {
-            item.setDescription(itemFromDto.getDescription());
-        }
-
-        if (Objects.nonNull(itemFromDto.getAvailable())) {
-            item.setAvailable(itemFromDto.getAvailable());
-        }
+        item.setName(Objects.requireNonNullElse(itemFromDto.getName(), item.getName()));
+        item.setDescription(Objects.requireNonNullElse(itemFromDto.getDescription(), item.getDescription()));
+        item.setAvailable(Objects.requireNonNullElse(itemFromDto.getAvailable(), item.getAvailable()));
 
         return itemMapper.toItemDto(itemDao.update(item, itemId));
     }

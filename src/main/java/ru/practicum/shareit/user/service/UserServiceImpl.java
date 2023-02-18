@@ -51,21 +51,12 @@ public class UserServiceImpl implements UserService {
     public UserDto updateById(UserDto userDto, Long userId) {
         User userFromMap = userMapper.toUser(findById(userId));
         User userFromDto = userMapper.toUser(userDto);
-        String emailRegExp = "^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
 
         checkUserIsNotExists(userFromMap);
         checkUserEmailIsNotUnique(userFromDto, userId);
 
-        if (userFromDto.getEmail() != null
-                && userFromDto.getEmail().matches(emailRegExp)) {
-            userFromMap.setEmail(userFromDto.getEmail());
-        }
-
-        if (userFromDto.getName() != null
-                && !userFromDto.getName().isEmpty()
-                && !userFromDto.getName().isBlank()) {
-            userFromMap.setName(userFromDto.getName());
-        }
+        userFromMap.setName(Objects.requireNonNullElse(userFromDto.getName(), userFromMap.getName()));
+        userFromMap.setEmail(Objects.requireNonNullElse(userFromDto.getEmail(), userFromMap.getEmail()));
 
         return userMapper.toUserDto(userDao.update(userFromMap, userId));
     }
