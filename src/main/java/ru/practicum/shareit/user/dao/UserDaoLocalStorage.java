@@ -28,17 +28,17 @@ public class UserDaoLocalStorage implements UserDao {
     }
 
     @Override
-    public List<User> getAll() {
+    public List<User> findAll() {
         return new ArrayList<>(userMap.values());
     }
 
     @Override
-    public Optional<User> getEntityById(Long id) {
+    public Optional<User> findById(Long id) {
         return Optional.ofNullable(userMap.get(id));
     }
 
     @Override
-    public User updateById(User user, Long userId) {
+    public User update(User user, Long userId) {
         userMap.put(userId, user);
 
         return user;

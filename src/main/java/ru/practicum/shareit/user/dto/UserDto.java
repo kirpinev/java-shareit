@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user.dto;
 
-import lombok.*;
+import lombok.Value;
+import ru.practicum.shareit.Create;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -8,9 +9,10 @@ import javax.validation.constraints.NotBlank;
 @Value
 public class UserDto {
     Long id;
-    @NotBlank
+    @NotBlank(groups = {Create.class})
     String name;
-    @Email(regexp = "^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
-    @NotBlank
+    @Email(regexp = "^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$",
+            groups = {Create.class})
+    @NotBlank(groups = {Create.class})
     String email;
 }

@@ -9,13 +9,13 @@ import java.util.Optional;
 public interface ItemDao {
     Item create(Item item);
 
-    Optional<Item> getEntityByUserIdAndItemId(Long userId, Long itemId);
+    Optional<Item> findByUserIdAndItemId(Long userId, Long itemId);
 
-    Optional<Item> getEntityById(Long itemId);
+    Optional<Item> findById(Long itemId);
 
-    List<Item> getAllByUserId(Long userId);
+    List<Item> findAllByUserId(Long userId);
 
-    List<Item> getEntitiesByText(String text);
+    List<Item> findByText(String text);
 
-    Item updateById(Item item, Long itemId);
+    Item update(Item item, Long itemId);
 }

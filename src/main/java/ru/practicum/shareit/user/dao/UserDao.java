@@ -9,11 +9,11 @@ import java.util.Optional;
 public interface UserDao {
     User create(User user);
 
-    List<User> getAll();
+    List<User> findAll();
 
-    Optional<User> getEntityById(Long id);
+    Optional<User> findById(Long id);
 
-    User updateById(User user, Long userId);
+    User update(User user, Long userId);
 
     void delete(Long id);
 }
