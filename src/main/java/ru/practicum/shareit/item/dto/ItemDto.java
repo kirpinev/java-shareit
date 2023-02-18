@@ -1,8 +1,10 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.*;
+import lombok.Value;
+import ru.practicum.shareit.Create;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 /**
  * TODO Sprint add-controllers.
@@ -10,10 +12,10 @@ import javax.validation.constraints.*;
 @Value
 public class ItemDto {
     Long id;
-    @NotBlank
+    @NotBlank(groups = {Create.class})
     String name;
-    @NotBlank
+    @NotBlank(groups = {Create.class})
     String description;
-    @NotNull
+    @NotNull(groups = {Create.class})
     Boolean available;
 }

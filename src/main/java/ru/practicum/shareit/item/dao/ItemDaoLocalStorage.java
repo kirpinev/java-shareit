@@ -33,7 +33,7 @@ public class ItemDaoLocalStorage implements ItemDao {
     }
 
     @Override
-    public Optional<Item> getEntityByUserIdAndItemId(Long userId, Long itemId) {
+    public Optional<Item> findByUserIdAndItemId(Long userId, Long itemId) {
         List<Item> items = itemsMap.get(userId);
 
         if (Objects.nonNull(items)) {
@@ -46,7 +46,7 @@ public class ItemDaoLocalStorage implements ItemDao {
         return Optional.empty();
     }
 
-    public Optional<Item> getEntityById(Long itemId) {
+    public Optional<Item> findById(Long itemId) {
         List<Item> items = new ArrayList<>();
         itemsMap.values().forEach(items::addAll);
 
@@ -57,12 +57,12 @@ public class ItemDaoLocalStorage implements ItemDao {
     }
 
     @Override
-    public List<Item> getAllByUserId(Long userId) {
+    public List<Item> findAllByUserId(Long userId) {
         return itemsMap.get(userId);
     }
 
     @Override
-    public List<Item> getEntitiesByText(String text) {
+    public List<Item> findByText(String text) {
         List<Item> items = new ArrayList<>();
         itemsMap.values().forEach(items::addAll);
 
@@ -79,7 +79,7 @@ public class ItemDaoLocalStorage implements ItemDao {
     }
 
     @Override
-    public Item updateById(Item item, Long itemId) {
+    public Item update(Item item, Long itemId) {
         List<Item> items = itemsMap.get(item.getOwner().getId());
         int index = items.indexOf(item);
 

@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.dao.UserDao;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
@@ -16,52 +18,63 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserDao userDao;
+    private final UserMapper userMapper;
+
 
     @Override
-    public User create(User user) {
+    public UserDto create(UserDto userDto) {
+        User user = userMapper.toUser(userDto);
+
         checkUserEmailIsNotUnique(user, user.getId());
 
-        return userDao.create(user);
+        return userMapper.toUserDto(userDao.create(user));
     }
 
     @Override
-    public List<User> getAll() {
-        return userDao.getAll();
+    public List<UserDto> findAll() {
+        return userDao.findAll()
+                .stream()
+                .map(userMapper::toUserDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public User getEntityById(Long userId) {
-        return userDao.getEntityById(userId).orElseThrow(() -> {
+    public UserDto findById(Long userId) {
+        User user = userDao.findById(userId).orElseThrow(() -> {
             throw new NotFoundException(String.format("Пользователя с id %s нет", userId));
         });
+
+        return userMapper.toUserDto(user);
     }
 
     @Override
-    public User updateById(User user, Long userId) {
-        User userFromMap = getEntityById(userId);
+    public UserDto updateById(UserDto userDto, Long userId) {
+        User userFromMap = userMapper.toUser(findById(userId));
+        User userFromDto = userMapper.toUser(userDto);
         String emailRegExp = "^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
 
         checkUserIsNotExists(userFromMap);
-        checkUserEmailIsNotUnique(user, userId);
+        checkUserEmailIsNotUnique(userFromDto, userId);
 
-        if (user.getEmail() != null
-                && user.getEmail().matches(emailRegExp)) {
-            userFromMap.setEmail(user.getEmail());
+        if (userFromDto.getEmail() != null
+                && userFromDto.getEmail().matches(emailRegExp)) {
+            userFromMap.setEmail(userFromDto.getEmail());
         }
 
-        if (user.getName() != null
-                && !user.getName().isEmpty() && !user.getName().isBlank()) {
-            userFromMap.setName(user.getName());
+        if (userFromDto.getName() != null
+                && !userFromDto.getName().isEmpty()
+                && !userFromDto.getName().isBlank()) {
+            userFromMap.setName(userFromDto.getName());
         }
 
-        return userDao.updateById(userFromMap, userId);
+        return userMapper.toUserDto(userDao.update(userFromMap, userId));
     }
 
     @Override
     public void delete(Long userId) {
-        User user = getEntityById(userId);
+        User userFromMap = userMapper.toUser(findById(userId));
 
-        checkUserIsNotExists(user);
+        checkUserIsNotExists(userFromMap);
 
         userDao.delete(userId);
     }
@@ -73,7 +86,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void checkUserEmailIsNotUnique(User user, Long userId) {
-        List<User> userWithSameEmail = getAll()
+        List<UserDto> userWithSameEmail = findAll()
                 .stream()
                 .filter(u -> u.getEmail().equals(user.getEmail()))
                 .filter(u -> !Objects.equals(u.getId(), userId))
