@@ -17,8 +17,10 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
+
     private final ItemDao itemDao;
     private final ItemMapper itemMapper;
+    private static final String ITEM_NOT_FOUND_MESSAGE = "Вещи с id %s нет";
 
     @Override
     public ItemDto create(ItemDto itemDto, UserDto userDto) {
@@ -32,14 +34,14 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Item findByUserIdAndItemId(Long userId, Long itemId) {
         return itemDao.findByUserIdAndItemId(userId, itemId).orElseThrow(() -> {
-            throw new NotFoundException(String.format("Вещи с id %s нет", itemId));
+            throw new NotFoundException(String.format(ITEM_NOT_FOUND_MESSAGE, itemId));
         });
     }
 
     @Override
     public ItemDto findById(Long itemId) {
         Item item = itemDao.findById(itemId).orElseThrow(() -> {
-            throw new NotFoundException(String.format("Вещи с id %s нет", itemId));
+            throw new NotFoundException(String.format(ITEM_NOT_FOUND_MESSAGE, itemId));
         });
 
         return itemMapper.toItemDto(item);

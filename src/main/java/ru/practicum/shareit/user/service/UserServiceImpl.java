@@ -19,7 +19,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserDao userDao;
     private final UserMapper userMapper;
-
+    private static final String USER_NOT_FOUND_MESSAGE = "Пользователя с id %s нет";
 
     @Override
     public UserDto create(UserDto userDto) {
@@ -41,7 +41,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto findById(Long userId) {
         User user = userDao.findById(userId).orElseThrow(() -> {
-            throw new NotFoundException(String.format("Пользователя с id %s нет", userId));
+            throw new NotFoundException(String.format(USER_NOT_FOUND_MESSAGE, userId));
         });
 
         return userMapper.toUserDto(user);
@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserService {
         User userFromMap = userMapper.toUser(findById(userId));
         User userFromDto = userMapper.toUser(userDto);
 
-        checkUserIsNotExists(userFromMap);
+        checkUserIsNotExists(userFromMap, userId);
         checkUserEmailIsNotUnique(userFromDto, userId);
 
         userFromMap.setName(Objects.requireNonNullElse(userFromDto.getName(), userFromMap.getName()));
@@ -65,14 +65,13 @@ public class UserServiceImpl implements UserService {
     public void delete(Long userId) {
         User userFromMap = userMapper.toUser(findById(userId));
 
-        checkUserIsNotExists(userFromMap);
-
+        checkUserIsNotExists(userFromMap, userId);
         userDao.delete(userId);
     }
 
-    private void checkUserIsNotExists(User user) {
+    private void checkUserIsNotExists(User user, Long userId) {
         if (user == null) {
-            throw new NotFoundException("Такого пользователя нет");
+            throw new NotFoundException(String.format(USER_NOT_FOUND_MESSAGE, userId));
         }
     }
 
