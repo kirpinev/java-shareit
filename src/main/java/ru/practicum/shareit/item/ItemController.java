@@ -6,6 +6,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.Create;
 import ru.practicum.shareit.Update;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -13,9 +14,6 @@ import ru.practicum.shareit.user.service.UserService;
 
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Slf4j
 @RequiredArgsConstructor
 @RestController
@@ -36,7 +34,17 @@ public class ItemController {
     public List<ItemDto> getAll(@RequestHeader("X-Sharer-User-Id") Long userId) {
         userService.findById(userId);
 
-        return itemService.findAllByUserId(userId);
+        return itemService.getAllByUserId(userId);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addComment(@Validated({Create.class}) @RequestBody CommentDto commentDto,
+                                 @RequestHeader("X-Sharer-User-Id") Long userId,
+                                 @PathVariable Long itemId) {
+        UserDto userDto = userService.findById(userId);
+        ItemDto itemDto = itemService.getByItemIdAndUserId(itemId, userId);
+
+        return itemService.createComment(commentDto, userDto, itemDto);
     }
 
     @GetMapping("/{itemId}")
@@ -44,7 +52,7 @@ public class ItemController {
                            @PathVariable("itemId") Long itemId) {
         userService.findById(userId);
 
-        return itemService.findById(itemId);
+        return itemService.getByItemIdAndUserId(itemId, userId);
     }
 
     @GetMapping("/search")
@@ -52,15 +60,15 @@ public class ItemController {
                                    @RequestParam(name = "text") String text) {
         userService.findById(userId);
 
-        return itemService.findAllByText(text);
+        return itemService.getAllByText(text);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto update(@RequestHeader("X-Sharer-User-Id") Long userId,
                           @Validated({Update.class}) @RequestBody ItemDto itemDto,
                           @PathVariable("itemId") Long itemId) {
-        userService.findById(userId);
+        UserDto userDto = userService.findById(userId);
 
-        return itemService.update(userId, itemId, itemDto);
+        return itemService.update(userDto, itemId, itemDto);
     }
 }
