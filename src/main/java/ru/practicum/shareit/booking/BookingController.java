@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.Create;
 import ru.practicum.shareit.booking.dto.BookingInputDto;
 import ru.practicum.shareit.booking.dto.BookingOutputDto;
-import ru.practicum.shareit.booking.model.State;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.booking.service.State;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -51,24 +51,26 @@ public class BookingController {
     @GetMapping
     public List<BookingOutputDto> getAll(@RequestHeader("X-Sharer-User-Id") Long userId,
                                          @RequestParam(value = "state", defaultValue = "ALL") String state) {
-        UserDto userDto = userService.findById(userId);
+        try {
+            UserDto userDto = userService.findById(userId);
+            State stateEnum = State.valueOf(state);
 
-        State stateEnum = State.from(state).orElseThrow(() -> {
+            return bookingService.findAllByBooker(userDto.getId(), stateEnum);
+        } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Unknown state: " + state);
-        });
-
-        return bookingService.findAllByBooker(userDto.getId(), stateEnum);
+        }
     }
 
     @GetMapping("/owner")
     public List<BookingOutputDto> getAllByOwner(@RequestHeader("X-Sharer-User-Id") Long userId,
                                                 @RequestParam(value = "state", defaultValue = "ALL") String state) {
-        UserDto userDto = userService.findById(userId);
+        try {
+            UserDto userDto = userService.findById(userId);
+            State stateEnum = State.valueOf(state);
 
-        State stateEnum = State.from(state).orElseThrow(() -> {
+            return bookingService.findAllByOwner(userDto.getId(), stateEnum);
+        } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Unknown state: " + state);
-        });
-
-        return bookingService.findAllByOwner(userDto.getId(), stateEnum);
+        }
     }
 }

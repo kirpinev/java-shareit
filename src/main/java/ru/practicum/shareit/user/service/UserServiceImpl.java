@@ -4,10 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.user.UserMapper;
-import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
 import java.util.Objects;
@@ -17,20 +16,19 @@ import java.util.Objects;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final UserMapper userMapper;
 
     @Override
     @Transactional
     public UserDto create(UserDto userDto) {
-        User user = userMapper.toUser(userDto);
+        User user = UserMapper.toUser(userDto);
 
-        return userMapper.toUserDto(userRepository.save(user));
+        return UserMapper.toUserDto(userRepository.save(user));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<UserDto> findAll() {
-        return userMapper.toUserDto(userRepository.findAll());
+        return UserMapper.toUserDto(userRepository.findAll());
     }
 
     @Override
@@ -40,19 +38,19 @@ public class UserServiceImpl implements UserService {
             throw new NotFoundException(String.format("Пользователя с id %s нет", userId));
         });
 
-        return userMapper.toUserDto(user);
+        return UserMapper.toUserDto(user);
     }
 
     @Override
     @Transactional
     public UserDto updateById(UserDto userDto, Long userId) {
-        User userFromMap = userMapper.toUser(findById(userId));
-        User userFromDto = userMapper.toUser(userDto);
+        User userFromMap = UserMapper.toUser(findById(userId));
+        User userFromDto = UserMapper.toUser(userDto);
 
         userFromMap.setName(Objects.requireNonNullElse(userFromDto.getName(), userFromMap.getName()));
         userFromMap.setEmail(Objects.requireNonNullElse(userFromDto.getEmail(), userFromMap.getEmail()));
 
-        return userMapper.toUserDto(userRepository.save(userFromMap));
+        return UserMapper.toUserDto(userRepository.save(userFromMap));
     }
 
     @Override

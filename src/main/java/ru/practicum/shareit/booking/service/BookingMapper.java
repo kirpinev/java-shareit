@@ -1,6 +1,5 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.booking.service;
 
-import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.dto.BookingInputDto;
 import ru.practicum.shareit.booking.dto.BookingOutputDto;
 import ru.practicum.shareit.booking.model.Booking;
@@ -15,10 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
 public class BookingMapper {
 
-    public BookingOutputDto toBookingCreatedDto(Booking booking) {
+    public static BookingOutputDto toBookingCreatedDto(Booking booking) {
         UserDto userDto = new UserDto(booking.getBooker().getId(),
                 booking.getBooker().getName(),
                 booking.getBooker().getEmail());
@@ -32,19 +30,19 @@ public class BookingMapper {
                 booking.getStatus(), userDto, itemDto);
     }
 
-    public List<BookingOutputDto> toBookingCreatedDto(List<Booking> booking) {
+    public static List<BookingOutputDto> toBookingCreatedDto(List<Booking> booking) {
         return booking
                 .stream()
-                .map(this::toBookingCreatedDto)
+                .map(BookingMapper::toBookingCreatedDto)
                 .collect(Collectors.toList());
     }
 
-    public BookerInfoDto toBookingInfoDto(Booking booking) {
+    public static BookerInfoDto toBookingInfoDto(Booking booking) {
         return new BookerInfoDto(booking.getId(), booking.getBooker().getId(),
                 booking.getStart(), booking.getEnd());
     }
 
-    public Booking toBooking(BookingInputDto bookingInputDto,
+    public static Booking toBooking(BookingInputDto bookingInputDto,
                              Status status, ItemDto itemDto, UserDto userDto) {
         Booking booking = new Booking();
         Item item = new Item();

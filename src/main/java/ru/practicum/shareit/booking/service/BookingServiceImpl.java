@@ -3,13 +3,11 @@ package ru.practicum.shareit.booking.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.BookingMapper;
-import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.dto.BookingInputDto;
 import ru.practicum.shareit.booking.dto.BookingOutputDto;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.State;
 import ru.practicum.shareit.booking.model.Status;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.IncorrectStateException;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -25,7 +23,6 @@ import java.util.Objects;
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
-    private final BookingMapper bookingMapper;
     private static final String BOOKING_NOT_FOUND_MESSAGE = "Бронирования с id %s нет";
 
     @Override
@@ -47,9 +44,9 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException("Такой вещи нет");
         }
 
-        Booking booking = bookingMapper.toBooking(bookingInputDto, Status.WAITING, itemDto, userDto);
+        Booking booking = BookingMapper.toBooking(bookingInputDto, Status.WAITING, itemDto, userDto);
 
-        return bookingMapper.toBookingCreatedDto(bookingRepository.save(booking));
+        return BookingMapper.toBookingCreatedDto(bookingRepository.save(booking));
     }
 
     @Override
@@ -70,7 +67,7 @@ public class BookingServiceImpl implements BookingService {
 
         booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
 
-        return bookingMapper.toBookingCreatedDto(bookingRepository.save(booking));
+        return BookingMapper.toBookingCreatedDto(bookingRepository.save(booking));
     }
 
     @Override
@@ -85,7 +82,7 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException("Такого бронирования нет");
         }
 
-        return bookingMapper.toBookingCreatedDto(booking);
+        return BookingMapper.toBookingCreatedDto(booking);
     }
 
     @Override
@@ -95,31 +92,31 @@ public class BookingServiceImpl implements BookingService {
 
         switch (state) {
             case ALL:
-                return bookingMapper
+                return BookingMapper
                         .toBookingCreatedDto(bookingRepository
                                 .getAllBookingsByBookerId(bookerId));
             case CURRENT:
-                return bookingMapper
+                return BookingMapper
                         .toBookingCreatedDto(bookingRepository
                                 .getAllCurrentBookingsByBookerId(bookerId, now));
             case WAITING:
-                return bookingMapper
+                return BookingMapper
                         .toBookingCreatedDto(bookingRepository
                                 .getAllWaitingBookingsByBookerId(bookerId, now));
             case PAST:
-                return bookingMapper
+                return BookingMapper
                         .toBookingCreatedDto(bookingRepository
                                 .getAllPastBookingsByBookerId(bookerId, now));
             case FUTURE:
-                return bookingMapper
+                return BookingMapper
                         .toBookingCreatedDto(bookingRepository
                                 .getAllFutureBookingsByBookerId(bookerId, now));
             case REJECTED:
-                return bookingMapper
+                return BookingMapper
                         .toBookingCreatedDto(bookingRepository
                                 .getAllRejectedBookingsByBookerId(bookerId));
             default:
-                throw new IncorrectStateException("Unknown state");
+                throw new IncorrectStateException("Unknown state: " + state);
         }
     }
 
@@ -130,39 +127,31 @@ public class BookingServiceImpl implements BookingService {
 
         switch (state) {
             case ALL:
-                return bookingMapper
+                return BookingMapper
                         .toBookingCreatedDto(bookingRepository
                                 .getAllBookingsByOwnerId(userId));
             case CURRENT:
-                return bookingMapper
+                return BookingMapper
                         .toBookingCreatedDto(bookingRepository
                                 .getAllCurrentBookingsByOwnerId(userId, now));
             case WAITING:
-                return bookingMapper
+                return BookingMapper
                         .toBookingCreatedDto(bookingRepository
                                 .getAllWaitingBookingsByOwnerId(userId, now));
             case PAST:
-                return bookingMapper
+                return BookingMapper
                         .toBookingCreatedDto(bookingRepository
                                 .getAllPastBookingsByOwnerId(userId, now));
             case FUTURE:
-                return bookingMapper
+                return BookingMapper
                         .toBookingCreatedDto(bookingRepository
                                 .getAllFutureBookingsByOwnerId(userId, now));
             case REJECTED:
-                return bookingMapper
+                return BookingMapper
                         .toBookingCreatedDto(bookingRepository
                                 .getAllRejectedBookingsByOwnerId(userId));
             default:
-                throw new IncorrectStateException("Unknown state");
+                throw new IncorrectStateException("Unknown state: " + state);
         }
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public BookingOutputDto findByUserIdAndBookingId(Long userId, Long bookingId) {
-        Booking booking = bookingRepository.findByBookerIdAndId(userId, bookingId);
-
-        return bookingMapper.toBookingCreatedDto(booking);
     }
 }
