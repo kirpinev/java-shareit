@@ -7,10 +7,8 @@ import ru.practicum.shareit.Update;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Value
 public class ItemDto {
     Long id;
@@ -22,4 +20,8 @@ public class ItemDto {
     String description;
     @NotNull(groups = {Create.class})
     Boolean available;
+    Long ownerId;
+    BookerInfoDto lastBooking;
+    BookerInfoDto nextBooking;
+    List<CommentDto> comments;
 }
