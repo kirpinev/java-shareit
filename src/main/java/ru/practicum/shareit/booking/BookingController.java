@@ -50,27 +50,17 @@ public class BookingController {
 
     @GetMapping
     public List<BookingOutputDto> getAll(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                         @RequestParam(value = "state", defaultValue = "ALL") String state) {
-        try {
-            UserDto userDto = userService.findById(userId);
-            State stateEnum = State.valueOf(state);
+                                         @RequestParam(value = "state", defaultValue = "ALL") State state) {
+        UserDto userDto = userService.findById(userId);
 
-            return bookingService.findAllByBooker(userDto.getId(), stateEnum);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Unknown state: " + state);
-        }
+        return bookingService.findAllByBooker(userDto.getId(), state);
     }
 
     @GetMapping("/owner")
     public List<BookingOutputDto> getAllByOwner(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                                @RequestParam(value = "state", defaultValue = "ALL") String state) {
-        try {
-            UserDto userDto = userService.findById(userId);
-            State stateEnum = State.valueOf(state);
+                                                @RequestParam(value = "state", defaultValue = "ALL") State state) {
+        UserDto userDto = userService.findById(userId);
 
-            return bookingService.findAllByOwner(userDto.getId(), stateEnum);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Unknown state: " + state);
-        }
+        return bookingService.findAllByOwner(userDto.getId(), state);
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.Objects;
 
@@ -51,6 +52,14 @@ public class ErrorHandler {
         log.error(e.getMessage());
 
         return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleBadParams(final MethodArgumentTypeMismatchException e) {
+        log.error(e.getMessage());
+
+        return new ErrorResponse(String.format("Unknown %s: %s", e.getName(), e.getValue()));
     }
 
     @ExceptionHandler
