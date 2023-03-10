@@ -8,12 +8,12 @@ import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingMapper;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.CommentRepository;
 import ru.practicum.shareit.item.dto.BookerInfoDto;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 
@@ -59,6 +59,16 @@ public class ItemServiceImpl implements ItemService {
     @Transactional(readOnly = true)
     public List<ItemDto> getAllByUserId(Long userId) {
         return itemRepository.findAllByOwnerIdOrderByIdAsc(userId)
+                .stream()
+                .map(item -> ItemMapper.toItemDto(item, getLastBooking(item),
+                        getNextBooking(item), getAllCommentsByItemId(item.getId())))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ItemDto> getAllByRequestId(Long requestId) {
+        return itemRepository.findAllByRequestIdOrderByIdAsc(requestId)
                 .stream()
                 .map(item -> ItemMapper.toItemDto(item, getLastBooking(item),
                         getNextBooking(item), getAllCommentsByItemId(item.getId())))

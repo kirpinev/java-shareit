@@ -12,6 +12,9 @@ import java.util.List;
 
 public class ItemMapper {
 
+    private ItemMapper() {
+    }
+
     public static ItemDto toItemDto(Item item, BookerInfoDto lastBooking,
                                     BookerInfoDto nextBooking, List<CommentDto> commentDtos) {
         return new ItemDto(item.getId(),
@@ -21,7 +24,8 @@ public class ItemMapper {
                 item.getOwner().getId(),
                 lastBooking,
                 nextBooking,
-                commentDtos);
+                commentDtos,
+                item.getRequestId());
     }
 
     public static ItemDto toItemDto(Item item, List<CommentDto> commentDtos) {
@@ -32,7 +36,8 @@ public class ItemMapper {
                 item.getOwner().getId(),
                 null,
                 null,
-                commentDtos);
+                commentDtos,
+                item.getRequestId());
     }
 
     public static ItemDto toItemDto(Item item) {
@@ -43,7 +48,8 @@ public class ItemMapper {
                 item.getOwner().getId(),
                 null,
                 null,
-                new ArrayList<>());
+                new ArrayList<>(),
+                item.getRequestId());
     }
 
     public static Item toItem(ItemDto itemDto, UserDto userDto) {
@@ -58,6 +64,7 @@ public class ItemMapper {
         item.setDescription(itemDto.getDescription());
         item.setName(itemDto.getName());
         item.setAvailable(itemDto.getAvailable());
+        item.setRequestId(itemDto.getRequestId());
         item.setOwner(user);
 
         return item;

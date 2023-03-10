@@ -16,6 +16,9 @@ import java.util.stream.Collectors;
 
 public class BookingMapper {
 
+    private BookingMapper() {
+    }
+
     public static BookingOutputDto toBookingCreatedDto(Booking booking) {
         UserDto userDto = new UserDto(booking.getBooker().getId(),
                 booking.getBooker().getName(),
@@ -23,7 +26,7 @@ public class BookingMapper {
         ItemDto itemDto = new ItemDto(booking.getItem().getId(),
                 booking.getItem().getName(), booking.getItem().getDescription(),
                 booking.getItem().getAvailable(), booking.getItem().getOwner().getId(),
-               null, null, new ArrayList<>());
+                null, null, new ArrayList<>(), booking.getItem().getRequestId());
 
         return new BookingOutputDto(booking.getId(),
                 booking.getStart(), booking.getEnd(),
@@ -43,7 +46,7 @@ public class BookingMapper {
     }
 
     public static Booking toBooking(BookingInputDto bookingInputDto,
-                             Status status, ItemDto itemDto, UserDto userDto) {
+                                    Status status, ItemDto itemDto, UserDto userDto) {
         Booking booking = new Booking();
         Item item = new Item();
         User user = new User();

@@ -1,6 +1,8 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingInputDto;
@@ -15,6 +17,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 
@@ -38,6 +41,10 @@ public class BookingServiceImpl implements BookingService {
 
         if (bookingInputDto.getStart().isBefore(LocalDateTime.now())) {
             throw new BadRequestException("Дата начала не может быть раньше текущей даты");
+        }
+
+        if (bookingInputDto.getStart().isEqual(bookingInputDto.getEnd())) {
+            throw new BadRequestException("Дата начала не может быть равна дате окончания");
         }
 
         if (Objects.equals(itemDto.getOwnerId(), userDto.getId())) {
@@ -87,34 +94,36 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookingOutputDto> findAllByBooker(Long bookerId, State state) {
-        LocalDateTime now = LocalDateTime.now();
+    public List<BookingOutputDto> findAllByBooker(Long bookerId, State state, Integer from, Integer size) {
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        Pageable pageable = PageRequest.of(from / size, size);
 
         switch (state) {
             case ALL:
                 return BookingMapper
                         .toBookingCreatedDto(bookingRepository
-                                .getAllBookingsByBookerId(bookerId));
+                                .getAllBookingsByBookerId(bookerId, pageable));
+
             case CURRENT:
                 return BookingMapper
                         .toBookingCreatedDto(bookingRepository
-                                .getAllCurrentBookingsByBookerId(bookerId, now));
+                                .getAllCurrentBookingsByBookerId(bookerId, now, pageable));
             case WAITING:
                 return BookingMapper
                         .toBookingCreatedDto(bookingRepository
-                                .getAllWaitingBookingsByBookerId(bookerId, now));
+                                .getAllWaitingBookingsByBookerId(bookerId, now, pageable));
             case PAST:
                 return BookingMapper
                         .toBookingCreatedDto(bookingRepository
-                                .getAllPastBookingsByBookerId(bookerId, now));
+                                .getAllPastBookingsByBookerId(bookerId, now, pageable));
             case FUTURE:
                 return BookingMapper
                         .toBookingCreatedDto(bookingRepository
-                                .getAllFutureBookingsByBookerId(bookerId, now));
+                                .getAllFutureBookingsByBookerId(bookerId, now, pageable));
             case REJECTED:
                 return BookingMapper
                         .toBookingCreatedDto(bookingRepository
-                                .getAllRejectedBookingsByBookerId(bookerId));
+                                .getAllRejectedBookingsByBookerId(bookerId, pageable));
             default:
                 throw new IncorrectStateException("Unknown state: " + state);
         }
@@ -122,34 +131,36 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookingOutputDto> findAllByOwner(Long userId, State state) {
-        LocalDateTime now = LocalDateTime.now();
+    public List<BookingOutputDto> findAllByOwner(Long userId, State state, Integer from, Integer size) {
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        Pageable pageable = PageRequest.of(from / size, size);
 
         switch (state) {
             case ALL:
                 return BookingMapper
                         .toBookingCreatedDto(bookingRepository
-                                .getAllBookingsByOwnerId(userId));
+                                .getAllBookingsByOwnerId(userId, pageable));
+
             case CURRENT:
                 return BookingMapper
                         .toBookingCreatedDto(bookingRepository
-                                .getAllCurrentBookingsByOwnerId(userId, now));
+                                .getAllCurrentBookingsByOwnerId(userId, now, pageable));
             case WAITING:
                 return BookingMapper
                         .toBookingCreatedDto(bookingRepository
-                                .getAllWaitingBookingsByOwnerId(userId, now));
+                                .getAllWaitingBookingsByOwnerId(userId, now, pageable));
             case PAST:
                 return BookingMapper
                         .toBookingCreatedDto(bookingRepository
-                                .getAllPastBookingsByOwnerId(userId, now));
+                                .getAllPastBookingsByOwnerId(userId, now, pageable));
             case FUTURE:
                 return BookingMapper
                         .toBookingCreatedDto(bookingRepository
-                                .getAllFutureBookingsByOwnerId(userId, now));
+                                .getAllFutureBookingsByOwnerId(userId, now, pageable));
             case REJECTED:
                 return BookingMapper
                         .toBookingCreatedDto(bookingRepository
-                                .getAllRejectedBookingsByOwnerId(userId));
+                                .getAllRejectedBookingsByOwnerId(userId, pageable));
             default:
                 throw new IncorrectStateException("Unknown state: " + state);
         }
