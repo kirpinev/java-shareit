@@ -13,6 +13,8 @@ public interface ItemService {
 
     List<ItemDto> getAllByUserId(Long userId);
 
+    List<ItemDto> getAllByRequestId(Long requestId);
+
     List<ItemDto> getAllByText(String text);
 
     ItemDto update(UserDto userDto, Long itemId, ItemDto item);

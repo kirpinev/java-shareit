@@ -14,12 +14,14 @@ import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
+import javax.validation.constraints.Min;
 import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(path = "/bookings")
+@Validated
 public class BookingController {
 
     private final UserService userService;
@@ -50,17 +52,21 @@ public class BookingController {
 
     @GetMapping
     public List<BookingOutputDto> getAll(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                         @RequestParam(value = "state", defaultValue = "ALL") State state) {
+                                         @RequestParam(value = "state", defaultValue = "ALL") State state,
+                                         @RequestParam(value = "from", required = false, defaultValue = "0") @Min(0) Integer from,
+                                         @RequestParam(value = "size", required = false, defaultValue = "10") @Min(1) Integer size) {
         UserDto userDto = userService.findById(userId);
 
-        return bookingService.findAllByBooker(userDto.getId(), state);
+        return bookingService.findAllByBooker(userDto.getId(), state, from, size);
     }
 
     @GetMapping("/owner")
     public List<BookingOutputDto> getAllByOwner(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                                @RequestParam(value = "state", defaultValue = "ALL") State state) {
+                                                @RequestParam(value = "state", defaultValue = "ALL") State state,
+                                                @RequestParam(value = "from", required = false, defaultValue = "0") @Min(0) Integer from,
+                                                @RequestParam(value = "size", required = false, defaultValue = "10") @Min(1) Integer size) {
         UserDto userDto = userService.findById(userId);
 
-        return bookingService.findAllByOwner(userDto.getId(), state);
+        return bookingService.findAllByOwner(userDto.getId(), state, from, size);
     }
 }

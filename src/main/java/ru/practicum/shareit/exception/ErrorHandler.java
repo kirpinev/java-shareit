@@ -26,9 +26,9 @@ public class ErrorHandler {
         return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ExceptionHandler({MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleBadRequest(final MethodArgumentNotValidException e) {
+    public ErrorResponse handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
         String field = Objects.requireNonNull(e.getBindingResult().getFieldError()).getField();
         String errorMessage = e.getBindingResult().getAllErrors().get(0).getDefaultMessage();
         String message = String.format("Поле %s %s", field, errorMessage);
@@ -48,7 +48,7 @@ public class ErrorHandler {
 
     @ExceptionHandler({BadRequestException.class, IllegalArgumentException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleBadRequest(final RuntimeException e) {
+    public ErrorResponse handleBadRequestException(final RuntimeException e) {
         log.error(e.getMessage());
 
         return new ErrorResponse(e.getMessage());

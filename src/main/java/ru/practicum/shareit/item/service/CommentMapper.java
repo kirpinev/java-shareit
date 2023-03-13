@@ -9,6 +9,9 @@ import ru.practicum.shareit.user.model.User;
 
 public class CommentMapper {
 
+    private CommentMapper() {
+    }
+
     public static Comment toComment(CommentDto commentDto, UserDto userDto, ItemDto itemDto) {
         User user = new User();
         Item item = new Item();

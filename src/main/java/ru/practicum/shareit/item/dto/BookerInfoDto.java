@@ -1,17 +1,20 @@
 package ru.practicum.shareit.item.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Value;
-import org.springframework.format.annotation.DateTimeFormat;
+import lombok.extern.jackson.Jacksonized;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 
 @Value
-public class BookerInfoDto {
+@Jacksonized
+public class BookerInfoDto implements Serializable {
     Long id;
     Long bookerId;
-    @DateTimeFormat(pattern = "yyyy-MM-ddTHH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     LocalDateTime start;
-    @DateTimeFormat(pattern = "yyyy-MM-ddTHH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     LocalDateTime end;
 }
