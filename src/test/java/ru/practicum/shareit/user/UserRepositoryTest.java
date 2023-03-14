@@ -10,7 +10,7 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 @DataJpaTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class UserRepositoryTest {
 
     @Autowired
@@ -29,9 +29,9 @@ public class UserRepositoryTest {
         User found = userRepository.save(user);
 
         Assertions.assertNotNull(found);
-        Assertions.assertEquals(found.getId(), 1L);
-        Assertions.assertEquals(found.getName(), user.getName());
-        Assertions.assertEquals(found.getEmail(), user.getEmail());
+        Assertions.assertEquals(1L, found.getId());
+        Assertions.assertEquals(user.getName(), found.getName());
+        Assertions.assertEquals(user.getEmail(), found.getEmail());
     }
 
     @Test
@@ -42,9 +42,9 @@ public class UserRepositoryTest {
         User found = userRepository.findById(1L).orElse(null);
 
         Assertions.assertNotNull(found);
-        Assertions.assertEquals(found.getId(), 1L);
-        Assertions.assertEquals(found.getName(), user.getName());
-        Assertions.assertEquals(found.getEmail(), user.getEmail());
+        Assertions.assertEquals(1L, found.getId());
+        Assertions.assertEquals(user.getName(), found.getName());
+        Assertions.assertEquals(user.getEmail(), found.getEmail());
     }
 
     @Test
@@ -62,18 +62,18 @@ public class UserRepositoryTest {
         User userFound = userRepository.findById(1L).orElse(null);
 
         Assertions.assertNotNull(userFound);
-        Assertions.assertEquals(userFound.getId(), 1L);
-        Assertions.assertEquals(userFound.getName(), user.getName());
-        Assertions.assertEquals(userFound.getEmail(), user.getEmail());
+        Assertions.assertEquals(1L, userFound.getId());
+        Assertions.assertEquals(user.getName(), userFound.getName());
+        Assertions.assertEquals(user.getEmail(), userFound.getEmail());
 
         userFound.setEmail("stas@nail.com");
 
         User updatedUserFound = userRepository.findById(1L).orElse(null);
 
         Assertions.assertNotNull(updatedUserFound);
-        Assertions.assertEquals(updatedUserFound.getId(), 1L);
-        Assertions.assertEquals(updatedUserFound.getName(), user.getName());
-        Assertions.assertEquals(updatedUserFound.getEmail(), "stas@nail.com");
+        Assertions.assertEquals(1L, updatedUserFound.getId());
+        Assertions.assertEquals(user.getName(), updatedUserFound.getName());
+        Assertions.assertEquals("stas@nail.com", updatedUserFound.getEmail());
     }
 
     @Test

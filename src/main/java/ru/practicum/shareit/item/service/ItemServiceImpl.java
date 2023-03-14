@@ -1,6 +1,8 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
@@ -57,8 +59,10 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDto> getAllByUserId(Long userId) {
-        return itemRepository.findAllByOwnerIdOrderByIdAsc(userId)
+    public List<ItemDto> getAllByUserId(Long userId, Integer from, Integer size) {
+        Pageable pageable = PageRequest.of(from / size, size);
+
+        return itemRepository.findAllByOwnerIdOrderByIdAsc(userId, pageable)
                 .stream()
                 .map(item -> ItemMapper.toItemDto(item, getLastBooking(item),
                         getNextBooking(item), getAllCommentsByItemId(item.getId())))
@@ -70,19 +74,20 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDto> getAllByRequestId(Long requestId) {
         return itemRepository.findAllByRequestIdOrderByIdAsc(requestId)
                 .stream()
-                .map(item -> ItemMapper.toItemDto(item, getLastBooking(item),
-                        getNextBooking(item), getAllCommentsByItemId(item.getId())))
+                .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDto> getAllByText(String text) {
+    public List<ItemDto> getAllByText(String text, Integer from, Integer size) {
+        Pageable pageable = PageRequest.of(from / size, size);
+
         if (text.length() == 0) {
             return Collections.emptyList();
         }
 
-        return itemRepository.search(text)
+        return itemRepository.search(text, pageable)
                 .stream()
                 .map(item -> ItemMapper.toItemDto(item, getLastBooking(item),
                         getNextBooking(item), getAllCommentsByItemId(item.getId())))
@@ -110,10 +115,11 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public CommentDto createComment(CommentDto commentDto, UserDto userDto, ItemDto itemDto) {
+    public CommentDto createComment(CommentDto commentDto,
+                                    UserDto userDto, ItemDto itemDto, LocalDateTime time) {
         Comment comment = CommentMapper.toComment(commentDto, userDto, itemDto);
         List<Booking> bookings = bookingRepository
-                .getAllUserBookings(userDto.getId(), itemDto.getId(), LocalDateTime.now());
+                .getAllUserBookings(userDto.getId(), itemDto.getId(), time);
 
         if (bookings.isEmpty()) {
             throw new BadRequestException("Чтобы оставить комментарий нужно сначала оформить бронирование");

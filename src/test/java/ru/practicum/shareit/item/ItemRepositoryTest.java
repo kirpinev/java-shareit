@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -13,10 +14,11 @@ import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @DataJpaTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ItemRepositoryTest {
 
     @Autowired
@@ -42,7 +44,8 @@ public class ItemRepositoryTest {
             null,
             "Запрос",
             1L,
-            LocalDateTime.now());
+            LocalDateTime.now(),
+            new ArrayList<>());
 
     @BeforeEach
     void setup() {
@@ -56,13 +59,13 @@ public class ItemRepositoryTest {
         Item found = itemRepository.save(item);
 
         Assertions.assertNotNull(found);
-        Assertions.assertEquals(found.getId(), 1L);
-        Assertions.assertEquals(found.getName(), item.getName());
-        Assertions.assertEquals(found.getDescription(), item.getDescription());
+        Assertions.assertEquals(1L, found.getId());
+        Assertions.assertEquals(item.getName(), found.getName());
+        Assertions.assertEquals(item.getDescription(), found.getDescription());
         Assertions.assertTrue(found.getAvailable());
         Assertions.assertNotNull(found.getRequestId());
-        Assertions.assertEquals(found.getOwner().getName(), user.getName());
-        Assertions.assertEquals(found.getOwner().getEmail(), user.getEmail());
+        Assertions.assertEquals(user.getName(), found.getOwner().getName());
+        Assertions.assertEquals(user.getEmail(), found.getOwner().getEmail());
     }
 
     @Test
@@ -73,13 +76,13 @@ public class ItemRepositoryTest {
         Item found = itemRepository.findById(1L).orElse(null);
 
         Assertions.assertNotNull(found);
-        Assertions.assertEquals(found.getId(), 1L);
-        Assertions.assertEquals(found.getName(), item.getName());
-        Assertions.assertEquals(found.getDescription(), item.getDescription());
+        Assertions.assertEquals(1L, found.getId());
+        Assertions.assertEquals(item.getName(), found.getName());
+        Assertions.assertEquals(item.getDescription(), found.getDescription());
         Assertions.assertTrue(found.getAvailable());
         Assertions.assertNotNull(found.getRequestId());
-        Assertions.assertEquals(found.getOwner().getName(), user.getName());
-        Assertions.assertEquals(found.getOwner().getEmail(), user.getEmail());
+        Assertions.assertEquals(user.getName(), found.getOwner().getName());
+        Assertions.assertEquals(user.getEmail(), found.getOwner().getEmail());
     }
 
     @Test
@@ -87,17 +90,17 @@ public class ItemRepositoryTest {
         entityManager.persist(item);
         entityManager.flush();
 
-        List<Item> found = itemRepository.findAllByOwnerIdOrderByIdAsc(1L);
+        List<Item> found = itemRepository.findAllByOwnerIdOrderByIdAsc(1L, PageRequest.of(0, 1));
 
         Assertions.assertNotNull(found);
-        Assertions.assertEquals(found.size(), 1);
-        Assertions.assertEquals(found.get(0).getId(), 1L);
-        Assertions.assertEquals(found.get(0).getName(), item.getName());
-        Assertions.assertEquals(found.get(0).getDescription(), item.getDescription());
+        Assertions.assertEquals(1, found.size());
+        Assertions.assertEquals(1L, found.get(0).getId());
+        Assertions.assertEquals(item.getName(), found.get(0).getName());
+        Assertions.assertEquals(item.getDescription(), found.get(0).getDescription());
         Assertions.assertTrue(found.get(0).getAvailable());
         Assertions.assertNotNull(found.get(0).getRequestId());
-        Assertions.assertEquals(found.get(0).getOwner().getName(), user.getName());
-        Assertions.assertEquals(found.get(0).getOwner().getEmail(), user.getEmail());
+        Assertions.assertEquals(user.getName(), found.get(0).getOwner().getName());
+        Assertions.assertEquals(user.getEmail(), found.get(0).getOwner().getEmail());
     }
 
     @Test
@@ -108,14 +111,14 @@ public class ItemRepositoryTest {
         List<Item> found = itemRepository.findAllByRequestIdOrderByIdAsc(1L);
 
         Assertions.assertNotNull(found);
-        Assertions.assertEquals(found.size(), 1);
-        Assertions.assertEquals(found.get(0).getId(), 1L);
-        Assertions.assertEquals(found.get(0).getName(), item.getName());
-        Assertions.assertEquals(found.get(0).getDescription(), item.getDescription());
+        Assertions.assertEquals(1, found.size());
+        Assertions.assertEquals(1L, found.get(0).getId());
+        Assertions.assertEquals(item.getName(), found.get(0).getName());
+        Assertions.assertEquals(item.getDescription(), found.get(0).getDescription());
         Assertions.assertTrue(found.get(0).getAvailable());
         Assertions.assertNotNull(found.get(0).getRequestId());
-        Assertions.assertEquals(found.get(0).getOwner().getName(), user.getName());
-        Assertions.assertEquals(found.get(0).getOwner().getEmail(), user.getEmail());
+        Assertions.assertEquals(user.getName(), found.get(0).getOwner().getName());
+        Assertions.assertEquals(user.getEmail(), found.get(0).getOwner().getEmail());
     }
 
     @Test
@@ -123,17 +126,17 @@ public class ItemRepositoryTest {
         entityManager.persist(item);
         entityManager.flush();
 
-        List<Item> found = itemRepository.search("Какая-то вещь");
+        List<Item> found = itemRepository.search("Какая-то вещь", PageRequest.of(0, 1));
 
         Assertions.assertNotNull(found);
-        Assertions.assertEquals(found.size(), 1);
-        Assertions.assertEquals(found.get(0).getId(), 1L);
-        Assertions.assertEquals(found.get(0).getName(), item.getName());
-        Assertions.assertEquals(found.get(0).getDescription(), item.getDescription());
+        Assertions.assertEquals(1, found.size());
+        Assertions.assertEquals(1L, found.get(0).getId());
+        Assertions.assertEquals(item.getName(), found.get(0).getName());
+        Assertions.assertEquals(item.getDescription(), found.get(0).getDescription());
         Assertions.assertTrue(found.get(0).getAvailable());
         Assertions.assertNotNull(found.get(0).getRequestId());
-        Assertions.assertEquals(found.get(0).getOwner().getName(), user.getName());
-        Assertions.assertEquals(found.get(0).getOwner().getEmail(), user.getEmail());
+        Assertions.assertEquals(user.getName(), found.get(0).getOwner().getName());
+        Assertions.assertEquals(user.getEmail(), found.get(0).getOwner().getEmail());
     }
 
     @Test
@@ -144,12 +147,12 @@ public class ItemRepositoryTest {
         Item found = itemRepository.findByOwnerIdAndId(1L, 1L);
 
         Assertions.assertNotNull(found);
-        Assertions.assertEquals(found.getId(), 1L);
-        Assertions.assertEquals(found.getName(), item.getName());
-        Assertions.assertEquals(found.getDescription(), item.getDescription());
+        Assertions.assertEquals(1L, found.getId());
+        Assertions.assertEquals(item.getName(), found.getName());
+        Assertions.assertEquals(item.getDescription(), found.getDescription());
         Assertions.assertTrue(found.getAvailable());
         Assertions.assertNotNull(found.getRequestId());
-        Assertions.assertEquals(found.getOwner().getName(), user.getName());
-        Assertions.assertEquals(found.getOwner().getEmail(), user.getEmail());
+        Assertions.assertEquals(user.getName(), found.getOwner().getName());
+        Assertions.assertEquals(user.getEmail(), found.getOwner().getEmail());
     }
 }

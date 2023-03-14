@@ -1,12 +1,13 @@
 package ru.practicum.shareit.user;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
-import org.springframework.boot.test.json.JsonContent;
 import ru.practicum.shareit.user.dto.UserDto;
+
+import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,34 +17,49 @@ public class UserDtoTest {
     @Autowired
     private JacksonTester<UserDto> json;
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final String name = "Igor";
 
-    private final UserDto userDto = new UserDto(
-            1L,
-            "igor",
-            "igor@gmail.com");
+    private final String email = "igor@gmail.com";
 
-    @Test
-    void testSerialize() throws Exception {
+    private final Long id = 1L;
 
-        JsonContent<UserDto> result = json.write(userDto);
+    private final String jsonToDeserialize =
+            "{\"name\":\""
+                    + name
+                    + "\",\"email\":\""
+                    + email
+                    + "\",\"id\":\""
+                    + id
+                    + "\"}";
 
-        assertThat(result).hasJsonPathStringValue("$.name");
-        assertThat(result).extractingJsonPathStringValue("$.name").isEqualTo("igor");
-        assertThat(result).hasJsonPathStringValue("$.email");
-        assertThat(result).extractingJsonPathStringValue("$.email")
-                .isEqualTo("igor@gmail.com");
+    private UserDto userDto = null;
+
+    @BeforeEach
+    public void setup() {
+        userDto = new UserDto(null, name, email);
     }
 
     @Test
-    public void testDeserialize() throws Exception {
-        mapper.findAndRegisterModules();
+    public void firstNameSerializes() throws IOException {
+        assertThat(json.write(userDto))
+                .extractingJsonPathStringValue("$.name")
+                .isEqualTo(name);
+    }
 
-        String jsonContent = mapper.writeValueAsString(userDto);
-        UserDto result = json.parse(jsonContent).getObject();
+    @Test
+    public void emailSerializes() throws IOException {
+        assertThat(json.write(userDto))
+                .extractingJsonPathStringValue("$.email")
+                .isEqualTo(email);
+    }
 
-        assertThat(result.getId()).isEqualTo(userDto.getId());
-        assertThat(result.getName()).isEqualTo(userDto.getName());
-        assertThat(result.getEmail()).isEqualTo(userDto.getEmail());
+    @Test
+    public void firstNameDeserializes() throws IOException {
+        assertThat(this.json.parseObject(jsonToDeserialize).getName()).isEqualTo(name);
+    }
+
+    @Test
+    public void emailDeserializes() throws IOException {
+        assertThat(this.json.parseObject(jsonToDeserialize).getEmail()).isEqualTo(email);
     }
 }

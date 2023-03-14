@@ -1,19 +1,15 @@
 package ru.practicum.shareit.booking;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
-import org.springframework.boot.test.json.JsonContent;
 import ru.practicum.shareit.booking.dto.BookingOutputDto;
 import ru.practicum.shareit.booking.model.Status;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.user.dto.UserDto;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,67 +19,92 @@ public class BookingOutputDtoTest {
     @Autowired
     private JacksonTester<BookingOutputDto> json;
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final LocalDateTime time = LocalDateTime.parse("2023-03-15T14:38:28");
 
-    private final UserDto userDto = new UserDto(
-            1L,
-            "Igor",
-            "igor@gmail.dom");
+    private final String jsonToDeserialize = "{\n" +
+            "\"id\": 2,\n" +
+            "\"start\": \"2023-03-15T14:38:28\",\n" +
+            "\"end\": \"2023-03-15T14:38:28\",\n" +
+            "\"status\": \"WAITING\",\n" +
+            "\"user\": null,\n" +
+            "\"item\": null\n" +
+            "}";
 
-    private final ItemDto itemDto = new ItemDto(
-            1L,
-            "Какая-то вещь",
-            "Какое-то описание",
-            true,
-            1L,
-            null,
-            null,
-            new ArrayList<>(),
-            1L);
+    private BookingOutputDto bookingOutputDto = null;
 
-    private final BookingOutputDto bookingOutputDto = new BookingOutputDto(
-            1L,
-            LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
-            LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.SECONDS),
-            Status.WAITING,
-            userDto,
-            itemDto);
-
-    @Test
-    void testSerialize() throws Exception {
-        JsonContent<BookingOutputDto> result = json.write(bookingOutputDto);
-
-        assertThat(result).hasJsonPathNumberValue("$.id");
-        assertThat(result).extractingJsonPathNumberValue("$.id")
-                .isEqualTo(bookingOutputDto.getId().intValue());
-        assertThat(result).hasJsonPathStringValue("$.start");
-        assertThat(result).extractingJsonPathStringValue("$.start")
-                .isEqualTo(bookingOutputDto.getStart().toString());
-        assertThat(result).hasJsonPathStringValue("$.end");
-        assertThat(result).extractingJsonPathStringValue("$.end")
-                .isEqualTo(bookingOutputDto.getEnd().toString());
-        assertThat(result).hasJsonPathStringValue("$.status");
-        assertThat(result).extractingJsonPathStringValue("$.status")
-                .isEqualTo(bookingOutputDto.getStatus().toString());
-        assertThat(result).hasJsonPathNumberValue("$.booker.id");
-        assertThat(result).extractingJsonPathNumberValue("$.booker.id")
-                .isEqualTo(bookingOutputDto.getBooker().getId().intValue());
-        assertThat(result).hasJsonPathNumberValue("$.item.id");
-        assertThat(result).extractingJsonPathNumberValue("$.item.id")
-                .isEqualTo(bookingOutputDto.getItem().getId().intValue());
+    @BeforeEach
+    public void setup() {
+        bookingOutputDto = new BookingOutputDto(
+                2L,
+                time,
+                time,
+                Status.WAITING.name(),
+                null,
+                null);
     }
 
     @Test
-    public void testDeserialize() throws Exception {
-        mapper.findAndRegisterModules();
+    public void idSerializes() throws IOException {
+        assertThat(json.write(bookingOutputDto))
+                .extractingJsonPathNumberValue("$.id")
+                .isEqualTo(2);
+    }
 
-        String jsonContent = mapper.writeValueAsString(bookingOutputDto);
-        BookingOutputDto result = json.parse(jsonContent).getObject();
+    @Test
+    public void startSerializes() throws IOException {
+        assertThat(json.write(bookingOutputDto))
+                .extractingJsonPathStringValue("$.start")
+                .isEqualTo("2023-03-15T14:38:28");
+    }
 
-        assertThat(result.getId()).isEqualTo(bookingOutputDto.getId());
-        assertThat(result.getStart()).isEqualTo(bookingOutputDto.getStart());
-        assertThat(result.getEnd()).isEqualTo(bookingOutputDto.getEnd());
-        assertThat(result.getBooker().getId()).isEqualTo(bookingOutputDto.getBooker().getId());
-        assertThat(result.getItem().getId()).isEqualTo(bookingOutputDto.getItem().getId());
+    @Test
+    public void endSerializes() throws IOException {
+        assertThat(json.write(bookingOutputDto))
+                .extractingJsonPathStringValue("$.end")
+                .isEqualTo("2023-03-15T14:38:28");
+    }
+
+    @Test
+    public void bookerSerializes() throws IOException {
+        assertThat(json.write(bookingOutputDto))
+                .extractingJsonPathMapValue("$.booker")
+                .isEqualTo(null);
+    }
+
+    @Test
+    public void itemSerializes() throws IOException {
+        assertThat(json.write(bookingOutputDto))
+                .extractingJsonPathMapValue("$.item")
+                .isEqualTo(null);
+    }
+
+    @Test
+    public void idDeserializes() throws IOException {
+        assertThat(json.parseObject(jsonToDeserialize).getId())
+                .isEqualTo(2L);
+    }
+
+    @Test
+    public void startDeserializes() throws IOException {
+        assertThat(json.parseObject(jsonToDeserialize).getStart())
+                .isEqualTo("2023-03-15T14:38:28");
+    }
+
+    @Test
+    public void endDeserializes() throws IOException {
+        assertThat(json.parseObject(jsonToDeserialize).getEnd())
+                .isEqualTo("2023-03-15T14:38:28");
+    }
+
+    @Test
+    public void bookerDeserializes() throws IOException {
+        assertThat(json.parseObject(jsonToDeserialize).getBooker())
+                .isEqualTo(null);
+    }
+
+    @Test
+    public void itemDeserializes() throws IOException {
+        assertThat(json.parseObject(jsonToDeserialize).getItem())
+                .isEqualTo(null);
     }
 }

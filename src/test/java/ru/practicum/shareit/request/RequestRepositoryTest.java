@@ -13,10 +13,11 @@ import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @DataJpaTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class RequestRepositoryTest {
 
     @Autowired
@@ -39,13 +40,15 @@ public class RequestRepositoryTest {
             null,
             "Запрос",
             1L,
-            LocalDateTime.now());
+            LocalDateTime.now(),
+            new ArrayList<>());
 
     private final Request anotherRequest = new Request(
             null,
             "Другой запрос",
             2L,
-            LocalDateTime.now().plusDays(1));
+            LocalDateTime.now().plusDays(1),
+            new ArrayList<>());
 
     @BeforeEach
     void setup() {
@@ -59,10 +62,10 @@ public class RequestRepositoryTest {
         Request createdRequest = requestRepository.save(request);
 
         Assertions.assertNotNull(createdRequest);
-        Assertions.assertEquals(createdRequest.getId(), 1L);
-        Assertions.assertEquals(createdRequest.getDescription(), request.getDescription());
-        Assertions.assertEquals(createdRequest.getRequestorId(), request.getRequestorId());
-        Assertions.assertEquals(createdRequest.getCreated(), request.getCreated());
+        Assertions.assertEquals(1L, createdRequest.getId());
+        Assertions.assertEquals(request.getDescription(), createdRequest.getDescription());
+        Assertions.assertEquals(request.getRequestorId(), createdRequest.getRequestorId());
+        Assertions.assertEquals(request.getCreated(), createdRequest.getCreated());
     }
 
     @Test
@@ -73,10 +76,10 @@ public class RequestRepositoryTest {
         Request found = requestRepository.findById(1L).orElse(null);
 
         Assertions.assertNotNull(found);
-        Assertions.assertEquals(found.getId(), 1L);
-        Assertions.assertEquals(found.getDescription(), request.getDescription());
-        Assertions.assertEquals(found.getRequestorId(), request.getRequestorId());
-        Assertions.assertEquals(found.getCreated(), request.getCreated());
+        Assertions.assertEquals(1L, found.getId());
+        Assertions.assertEquals(request.getDescription(), found.getDescription());
+        Assertions.assertEquals(request.getRequestorId(), found.getRequestorId());
+        Assertions.assertEquals(request.getCreated(), found.getCreated());
     }
 
     @Test
@@ -90,11 +93,11 @@ public class RequestRepositoryTest {
         List<Request> requests = requestRepository
                 .findAllByRequestorIdNotOrderByCreatedAsc(user2Id, PageRequest.of(0, 1));
 
-        Assertions.assertEquals(requests.size(), 1);
-        Assertions.assertEquals(requests.get(0).getId(), 1L);
-        Assertions.assertEquals(requests.get(0).getDescription(), request.getDescription());
-        Assertions.assertEquals(requests.get(0).getCreated(), request.getCreated());
-        Assertions.assertEquals(requests.get(0).getRequestorId(), user1Id);
+        Assertions.assertEquals(1, requests.size());
+        Assertions.assertEquals(1L, requests.get(0).getId());
+        Assertions.assertEquals(request.getDescription(), requests.get(0).getDescription());
+        Assertions.assertEquals(request.getCreated(), requests.get(0).getCreated());
+        Assertions.assertEquals(user1Id, requests.get(0).getRequestorId());
     }
 
     @Test
@@ -106,10 +109,10 @@ public class RequestRepositoryTest {
         Long user2Id = 2L;
         List<Request> requests = requestRepository.findAllByRequestorIdOrderByCreatedAsc(user2Id);
 
-        Assertions.assertEquals(requests.size(), 1);
-        Assertions.assertEquals(requests.get(0).getId(), 2L);
-        Assertions.assertEquals(requests.get(0).getDescription(), anotherRequest.getDescription());
-        Assertions.assertEquals(requests.get(0).getCreated(), anotherRequest.getCreated());
-        Assertions.assertEquals(requests.get(0).getRequestorId(), user2Id);
+        Assertions.assertEquals(1, requests.size());
+        Assertions.assertEquals(2L, requests.get(0).getId());
+        Assertions.assertEquals(anotherRequest.getDescription(), requests.get(0).getDescription());
+        Assertions.assertEquals(anotherRequest.getCreated(), requests.get(0).getCreated());
+        Assertions.assertEquals(user2Id, requests.get(0).getRequestorId());
     }
 }

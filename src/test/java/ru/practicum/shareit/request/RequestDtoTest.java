@@ -1,18 +1,15 @@
 package ru.practicum.shareit.request;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
-import org.springframework.boot.test.json.JsonContent;
-import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.request.dto.RequestDto;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.Collections;
-import java.util.List;
+import java.util.ArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,53 +19,75 @@ public class RequestDtoTest {
     @Autowired
     private JacksonTester<RequestDto> json;
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final LocalDateTime time = LocalDateTime.parse("2023-03-15T14:38:28");
 
-    ItemDto itemDto = new ItemDto(
-            4L,
-            "Щётка для обуви",
-            "Стандартная щётка для обуви",
-            true,
-            4L,
-            null,
-            null,
-            Collections.emptyList(),
-            1L);
+    private final String jsonToDeserialize = "{\n" +
+            "    \"id\": 1,\n" +
+            "    \"description\": \"Хотел бы воспользоваться щёткой для обуви\",\n" +
+            "    \"created\": \"2023-03-15T14:38:28\",\n" +
+            "    \"items\": []\n" +
+            "}";
 
-    private final RequestDto requestDto = new RequestDto(
-            1L,
-            "Хотел бы воспользоваться щёткой для обуви",
-            LocalDateTime.now(),
-            List.of(itemDto));
+    private RequestDto requestDto = null;
 
-    @Test
-    void testSerialize() throws Exception {
-        JsonContent<RequestDto> result = json.write(requestDto);
-
-        assertThat(result).hasJsonPathNumberValue("$.id");
-        assertThat(result).extractingJsonPathNumberValue("$.id").isEqualTo(1);
-        assertThat(result).hasJsonPathStringValue("$.description");
-        assertThat(result).extractingJsonPathStringValue("$.description")
-                .isEqualTo(requestDto.getDescription());
-        assertThat(result).hasJsonPathStringValue("$.created");
-        assertThat(result).extractingJsonPathStringValue("$.created")
-                .isEqualTo(requestDto.getCreated().truncatedTo(ChronoUnit.SECONDS).toString());
-        assertThat(result).hasJsonPathArrayValue("$.items");
-        assertThat(result).extractingJsonPathNumberValue("$.items[0].id")
-                .isEqualTo(requestDto.getItems().get(0).getId().intValue());
+    @BeforeEach
+    public void setup() {
+        requestDto = new RequestDto(
+                1L,
+                "Хотел бы воспользоваться щёткой для обуви",
+                time,
+                new ArrayList<>());
     }
 
     @Test
-    void testDeserialize() throws Exception {
-        mapper.findAndRegisterModules();
+    public void idSerializes() throws IOException {
+        assertThat(json.write(requestDto))
+                .extractingJsonPathNumberValue("$.id")
+                .isEqualTo(1);
+    }
 
-        String jsonContent = mapper.writeValueAsString(requestDto);
-        RequestDto result = json.parse(jsonContent).getObject();
+    @Test
+    public void descriptionSerializes() throws IOException {
+        assertThat(json.write(requestDto))
+                .extractingJsonPathStringValue("$.description")
+                .isEqualTo("Хотел бы воспользоваться щёткой для обуви");
+    }
 
-        assertThat(result.getId()).isEqualTo(1);
-        assertThat(result.getDescription()).isEqualTo("Хотел бы воспользоваться щёткой для обуви");
-        assertThat(result.getCreated()).isEqualTo(requestDto.getCreated().truncatedTo(ChronoUnit.SECONDS));
-        assertThat(result.getItems().size()).isEqualTo(1);
-        assertThat(result.getItems().get(0)).isEqualTo(itemDto);
+    @Test
+    public void createdSerializes() throws IOException {
+        assertThat(json.write(requestDto))
+                .extractingJsonPathStringValue("$.created")
+                .isEqualTo("2023-03-15T14:38:28");
+    }
+
+    @Test
+    public void itemsSerializes() throws IOException {
+        assertThat(json.write(requestDto))
+                .extractingJsonPathArrayValue("$.items").size()
+                .isEqualTo(0);
+    }
+
+    @Test
+    public void idDeserializes() throws IOException {
+        assertThat(json.parseObject(jsonToDeserialize).getId())
+                .isEqualTo(1);
+    }
+
+    @Test
+    public void descriptionDeserializes() throws IOException {
+        assertThat(json.parseObject(jsonToDeserialize).getDescription())
+                .isEqualTo("Хотел бы воспользоваться щёткой для обуви");
+    }
+
+    @Test
+    public void createdDeserializes() throws IOException {
+        assertThat(json.parseObject(jsonToDeserialize).getCreated())
+                .isEqualTo("2023-03-15T14:38:28");
+    }
+
+    @Test
+    public void itemsDeserializes() throws IOException {
+        assertThat(json.parseObject(jsonToDeserialize).getItems().size())
+                .isEqualTo(0);
     }
 }

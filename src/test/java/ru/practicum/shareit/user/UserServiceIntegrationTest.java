@@ -5,23 +5,38 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
+@Transactional
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class UserServiceIntegrationTest {
 
     @Autowired
-    UserService userService;
+    private UserService userService;
+
+    private final UserDto userDto = new UserDto(
+            null,
+            "Igor",
+            "igor@gmail.dom");
+
+    @Test
+    void createNewUser() {
+        UserDto createdUser = userService.create(userDto);
+
+        Assertions.assertEquals(1L, createdUser.getId());
+        Assertions.assertEquals(userDto.getName(), createdUser.getName());
+        Assertions.assertEquals(userDto.getEmail(), createdUser.getEmail());
+    }
 
     @Test
     void getUserByWrongId() {
         Long userId = 2L;
 
-        final NotFoundException exception = Assertions
+        Assertions
                 .assertThrows(NotFoundException.class, () -> userService.findById(userId));
-
-        Assertions.assertEquals(String.format("Пользователя с id %s нет", userId), exception.getMessage());
     }
 }

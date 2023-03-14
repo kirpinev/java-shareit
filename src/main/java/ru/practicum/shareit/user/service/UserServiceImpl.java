@@ -3,7 +3,6 @@ package ru.practicum.shareit.user.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
@@ -23,11 +22,7 @@ public class UserServiceImpl implements UserService {
     public UserDto create(UserDto userDto) {
         User user = UserMapper.toUser(userDto);
 
-        try {
-            return UserMapper.toUserDto(userRepository.save(user));
-        } catch (Exception e) {
-            throw new ConflictException("Нельзя создать пользователя с одинаковой почтой");
-        }
+        return UserMapper.toUserDto(userRepository.save(user));
     }
 
     @Override

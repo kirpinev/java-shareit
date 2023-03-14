@@ -8,7 +8,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.request.dto.RequestDto;
 import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.request.repository.RequestRepository;
@@ -17,7 +16,6 @@ import ru.practicum.shareit.user.dto.UserDto;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,9 +30,6 @@ public class RequestServiceImplTest {
 
     @Mock
     private RequestRepository requestRepository;
-
-    @Mock
-    private ItemService itemService;
 
     private final UserDto userDto = new UserDto(
             1L,
@@ -53,7 +48,8 @@ public class RequestServiceImplTest {
             1L,
             "Какой-то запрос",
             1L,
-            time);
+            time,
+            new ArrayList<>());
 
     @Test
     void createRequest() {
@@ -62,10 +58,10 @@ public class RequestServiceImplTest {
         RequestDto createdRequest = requestService.create(requestDto, userDto);
 
         Assertions.assertNotNull(createdRequest);
-        Assertions.assertEquals(createdRequest.getId(), requestDto.getId());
-        Assertions.assertEquals(createdRequest.getDescription(), requestDto.getDescription());
-        Assertions.assertEquals(createdRequest.getCreated(), requestDto.getCreated());
-        Assertions.assertEquals(createdRequest.getItems().size(), requestDto.getItems().size());
+        Assertions.assertEquals(requestDto.getId(), createdRequest.getId());
+        Assertions.assertEquals(requestDto.getDescription(), createdRequest.getDescription());
+        Assertions.assertEquals(requestDto.getCreated(), createdRequest.getCreated());
+        Assertions.assertEquals(requestDto.getItems().size(), createdRequest.getItems().size());
 
         verify(requestRepository, times(1)).save(any(Request.class));
         verifyNoMoreInteractions(requestRepository);
@@ -75,40 +71,34 @@ public class RequestServiceImplTest {
     void getAllOwnRequestsById() {
         when(requestRepository.findAllByRequestorIdOrderByCreatedAsc(anyLong()))
                 .thenReturn(List.of(request));
-        when(itemService.getAllByRequestId(anyLong())).thenReturn(Collections.emptyList());
 
         List<RequestDto> requests = requestService.getAllOwnRequestsById(anyLong());
 
-        Assertions.assertEquals(requests.size(), 1);
-        Assertions.assertEquals(requests.get(0).getId(), requestDto.getId());
-        Assertions.assertEquals(requests.get(0).getDescription(), requestDto.getDescription());
-        Assertions.assertEquals(requests.get(0).getCreated(), requestDto.getCreated());
-        Assertions.assertEquals(requests.get(0).getItems().size(), requestDto.getItems().size());
+        Assertions.assertEquals(1, requests.size());
+        Assertions.assertEquals(requestDto.getId(), requests.get(0).getId());
+        Assertions.assertEquals(requestDto.getDescription(), requests.get(0).getDescription());
+        Assertions.assertEquals(requestDto.getCreated(), requests.get(0).getCreated());
+        Assertions.assertEquals(requestDto.getItems().size(), requests.get(0).getItems().size());
 
         verify(requestRepository, times(1))
                 .findAllByRequestorIdOrderByCreatedAsc(anyLong());
         verifyNoMoreInteractions(requestRepository);
-        verify(itemService, times(1)).getAllByRequestId(anyLong());
-        verifyNoMoreInteractions(itemService);
     }
 
     @Test
     void getByRequestId() {
         when(requestRepository.findById(anyLong())).thenReturn(Optional.of(request));
-        when(itemService.getAllByRequestId(anyLong())).thenReturn(Collections.emptyList());
 
         RequestDto foundRequest = requestService.getByRequestId(anyLong());
 
         Assertions.assertNotNull(foundRequest);
-        Assertions.assertEquals(foundRequest.getId(), requestDto.getId());
-        Assertions.assertEquals(foundRequest.getDescription(), requestDto.getDescription());
-        Assertions.assertEquals(foundRequest.getCreated(), requestDto.getCreated());
-        Assertions.assertEquals(foundRequest.getItems().size(), requestDto.getItems().size());
+        Assertions.assertEquals(requestDto.getId(), foundRequest.getId());
+        Assertions.assertEquals(requestDto.getDescription(), foundRequest.getDescription());
+        Assertions.assertEquals(requestDto.getCreated(), foundRequest.getCreated());
+        Assertions.assertEquals(requestDto.getItems().size(), foundRequest.getItems().size());
 
         verify(requestRepository, times(1)).findById(anyLong());
         verifyNoMoreInteractions(requestRepository);
-        verify(itemService, times(1)).getAllByRequestId(anyLong());
-        verifyNoMoreInteractions(itemService);
     }
 
     @Test
@@ -117,20 +107,17 @@ public class RequestServiceImplTest {
 
         when(requestRepository.findAllByRequestorIdNotOrderByCreatedAsc(1L, pageable))
                 .thenReturn(List.of(request));
-        when(itemService.getAllByRequestId(anyLong())).thenReturn(Collections.emptyList());
 
         List<RequestDto> requests = requestService.getAllRequests(1L, 0, 1);
 
-        Assertions.assertEquals(requests.size(), 1);
-        Assertions.assertEquals(requests.get(0).getId(), requestDto.getId());
-        Assertions.assertEquals(requests.get(0).getDescription(), requestDto.getDescription());
-        Assertions.assertEquals(requests.get(0).getCreated(), requestDto.getCreated());
-        Assertions.assertEquals(requests.get(0).getItems().size(), requestDto.getItems().size());
+        Assertions.assertEquals(1, requests.size());
+        Assertions.assertEquals(requestDto.getId(), requests.get(0).getId());
+        Assertions.assertEquals(requestDto.getDescription(), requests.get(0).getDescription());
+        Assertions.assertEquals(requestDto.getCreated(), requests.get(0).getCreated());
+        Assertions.assertEquals(requestDto.getItems().size(), requests.get(0).getItems().size());
 
         verify(requestRepository, times(1))
                 .findAllByRequestorIdNotOrderByCreatedAsc(anyLong(), any(Pageable.class));
         verifyNoMoreInteractions(requestRepository);
-        verify(itemService, times(1)).getAllByRequestId(anyLong());
-        verifyNoMoreInteractions(itemService);
     }
 }

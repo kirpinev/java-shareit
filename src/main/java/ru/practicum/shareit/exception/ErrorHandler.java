@@ -18,14 +18,6 @@ import java.util.Objects;
 @RestControllerAdvice("ru.practicum.shareit")
 public class ErrorHandler {
 
-    @ExceptionHandler(ConflictException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleBadRequest(final ConflictException e) {
-        log.error(e.getMessage());
-
-        return new ErrorResponse(e.getMessage());
-    }
-
     @ExceptionHandler({MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {

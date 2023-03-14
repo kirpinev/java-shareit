@@ -30,7 +30,7 @@ public class BookingMapper {
 
         return new BookingOutputDto(booking.getId(),
                 booking.getStart(), booking.getEnd(),
-                booking.getStatus(), userDto, itemDto);
+                booking.getStatus().name(), userDto, itemDto);
     }
 
     public static List<BookingOutputDto> toBookingCreatedDto(List<Booking> booking) {

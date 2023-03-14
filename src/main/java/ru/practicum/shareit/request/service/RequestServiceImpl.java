@@ -5,8 +5,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.request.dto.RequestDto;
 import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.request.repository.RequestRepository;
@@ -21,8 +19,6 @@ public class RequestServiceImpl implements RequestService {
 
     private final RequestRepository requestRepository;
 
-    private final ItemService itemService;
-
     @Override
     @Transactional
     public RequestDto create(RequestDto requestDto, UserDto userDto) {
@@ -36,11 +32,10 @@ public class RequestServiceImpl implements RequestService {
     public List<RequestDto> getAllOwnRequestsById(Long userId) {
         List<Request> requests = requestRepository.findAllByRequestorIdOrderByCreatedAsc(userId);
 
-        return requests.stream().map(request -> {
-            List<ItemDto> items = itemService.getAllByRequestId(request.getId());
-
-            return RequestMapper.toRequestDto(request, items);
-        }).collect(Collectors.toList());
+        return requests
+                .stream()
+                .map(RequestMapper::toRequestDto)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -50,7 +45,7 @@ public class RequestServiceImpl implements RequestService {
             throw new NotFoundException(String.format("Запроса с id %s нет", requestId));
         });
 
-        return RequestMapper.toRequestDto(request, itemService.getAllByRequestId(request.getId()));
+        return RequestMapper.toRequestDto(request);
     }
 
     @Override
@@ -61,8 +56,7 @@ public class RequestServiceImpl implements RequestService {
 
         return requests
                 .stream()
-                .map(request -> RequestMapper.toRequestDto(request,
-                        itemService.getAllByRequestId(request.getId())))
+                .map(RequestMapper::toRequestDto)
                 .collect(Collectors.toList());
     }
 }

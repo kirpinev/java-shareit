@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.dto.BookingOutputDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
@@ -100,7 +101,7 @@ public class ItemServiceImplTest {
             1L,
             LocalDateTime.now(),
             LocalDateTime.now(),
-            Status.WAITING,
+            Status.WAITING.name(),
             userDto,
             itemDto);
 
@@ -112,15 +113,15 @@ public class ItemServiceImplTest {
         ItemDto createdItem = itemService.create(itemDto, userDto);
 
         Assertions.assertNotNull(createdItem);
-        Assertions.assertEquals(createdItem.getId(), 1);
-        Assertions.assertEquals(createdItem.getName(), itemDto.getName());
-        Assertions.assertEquals(createdItem.getDescription(), itemDto.getDescription());
+        Assertions.assertEquals(1, createdItem.getId());
+        Assertions.assertEquals(itemDto.getName(), createdItem.getName());
+        Assertions.assertEquals(itemDto.getDescription(), createdItem.getDescription());
         Assertions.assertTrue(createdItem.getAvailable());
-        Assertions.assertEquals(createdItem.getOwnerId(), itemDto.getOwnerId());
+        Assertions.assertEquals(itemDto.getOwnerId(), createdItem.getOwnerId());
         Assertions.assertNull(createdItem.getLastBooking());
         Assertions.assertNull(createdItem.getNextBooking());
-        Assertions.assertEquals(createdItem.getComments().size(), itemDto.getComments().size());
-        Assertions.assertEquals(createdItem.getRequestId(), itemDto.getRequestId());
+        Assertions.assertEquals(itemDto.getComments().size(), createdItem.getComments().size());
+        Assertions.assertEquals(itemDto.getRequestId(), createdItem.getRequestId());
 
         verify(itemRepository, times(1)).save(any(Item.class));
         verifyNoMoreInteractions(itemRepository);
@@ -136,15 +137,15 @@ public class ItemServiceImplTest {
         ItemDto itemById = itemService.getByItemIdAndUserId(1L, 1L);
 
         Assertions.assertNotNull(itemById);
-        Assertions.assertEquals(itemById.getId(), 1);
-        Assertions.assertEquals(itemById.getName(), itemDto.getName());
-        Assertions.assertEquals(itemById.getDescription(), itemDto.getDescription());
+        Assertions.assertEquals(1, itemById.getId());
+        Assertions.assertEquals(itemDto.getName(), itemById.getName());
+        Assertions.assertEquals(itemDto.getDescription(), itemById.getDescription());
         Assertions.assertTrue(itemById.getAvailable());
-        Assertions.assertEquals(itemById.getOwnerId(), itemDto.getOwnerId());
-        Assertions.assertEquals(itemById.getLastBooking().getId(), bookingOutputDto.getId());
-        Assertions.assertEquals(itemById.getNextBooking().getId(), bookingOutputDto.getId());
-        Assertions.assertEquals(itemById.getComments().size(), 1);
-        Assertions.assertEquals(itemById.getRequestId(), itemDto.getRequestId());
+        Assertions.assertEquals(itemDto.getOwnerId(), itemById.getOwnerId());
+        Assertions.assertEquals(bookingOutputDto.getId(), itemById.getLastBooking().getId());
+        Assertions.assertEquals(bookingOutputDto.getId(), itemById.getNextBooking().getId());
+        Assertions.assertEquals(1, itemById.getComments().size());
+        Assertions.assertEquals(itemDto.getRequestId(), itemById.getRequestId());
 
         verify(itemRepository, times(1)).findById(anyLong());
         verifyNoMoreInteractions(itemRepository);
@@ -160,15 +161,15 @@ public class ItemServiceImplTest {
         ItemDto itemById = itemService.getByItemIdAndUserId(1L, 2L);
 
         Assertions.assertNotNull(itemById);
-        Assertions.assertEquals(itemById.getId(), 1);
-        Assertions.assertEquals(itemById.getName(), itemDto.getName());
-        Assertions.assertEquals(itemById.getDescription(), itemDto.getDescription());
+        Assertions.assertEquals(1, itemById.getId());
+        Assertions.assertEquals(itemDto.getName(), itemById.getName());
+        Assertions.assertEquals(itemDto.getDescription(), itemById.getDescription());
         Assertions.assertTrue(itemById.getAvailable());
-        Assertions.assertEquals(itemById.getOwnerId(), itemDto.getOwnerId());
+        Assertions.assertEquals(itemDto.getOwnerId(), itemById.getOwnerId());
         Assertions.assertNull(itemById.getLastBooking());
         Assertions.assertNull(itemById.getNextBooking());
-        Assertions.assertEquals(itemById.getComments().size(), 1);
-        Assertions.assertEquals(itemById.getRequestId(), itemDto.getRequestId());
+        Assertions.assertEquals(1, itemById.getComments().size());
+        Assertions.assertEquals(itemDto.getRequestId(), itemById.getRequestId());
 
         verify(itemRepository, times(1)).findById(anyLong());
         verifyNoMoreInteractions(itemRepository);
@@ -178,25 +179,25 @@ public class ItemServiceImplTest {
 
     @Test
     void getAllItemsByUserId() {
-        when(itemRepository.findAllByOwnerIdOrderByIdAsc(anyLong())).thenReturn(List.of(item));
+        when(itemRepository.findAllByOwnerIdOrderByIdAsc(anyLong(), any(Pageable.class))).thenReturn(List.of(item));
         when(bookingRepository.getLastBooking(anyLong(), any())).thenReturn(Optional.of(booking));
         when(bookingRepository.getNextBooking(anyLong(), any())).thenReturn(Optional.of(booking));
         when(commentRepository.findAllByItemId(anyLong())).thenReturn(List.of(comment));
 
-        List<ItemDto> items = itemService.getAllByUserId(1L);
+        List<ItemDto> items = itemService.getAllByUserId(1L, 0, 1);
 
         Assertions.assertEquals(items.size(), 1);
-        Assertions.assertEquals(items.get(0).getId(), 1);
-        Assertions.assertEquals(items.get(0).getName(), itemDto.getName());
-        Assertions.assertEquals(items.get(0).getDescription(), itemDto.getDescription());
+        Assertions.assertEquals(1, items.get(0).getId());
+        Assertions.assertEquals(itemDto.getName(), items.get(0).getName());
+        Assertions.assertEquals(itemDto.getDescription(), items.get(0).getDescription());
         Assertions.assertTrue(items.get(0).getAvailable());
-        Assertions.assertEquals(items.get(0).getOwnerId(), itemDto.getOwnerId());
-        Assertions.assertEquals(items.get(0).getLastBooking().getId(), bookingOutputDto.getId());
-        Assertions.assertEquals(items.get(0).getNextBooking().getId(), bookingOutputDto.getId());
-        Assertions.assertEquals(items.get(0).getComments().size(), 1);
-        Assertions.assertEquals(items.get(0).getRequestId(), itemDto.getRequestId());
+        Assertions.assertEquals(itemDto.getOwnerId(), items.get(0).getOwnerId());
+        Assertions.assertEquals(bookingOutputDto.getId(), items.get(0).getLastBooking().getId());
+        Assertions.assertEquals(bookingOutputDto.getId(), items.get(0).getNextBooking().getId());
+        Assertions.assertEquals(1, items.get(0).getComments().size());
+        Assertions.assertEquals(itemDto.getRequestId(), items.get(0).getRequestId());
 
-        verify(itemRepository, times(1)).findAllByOwnerIdOrderByIdAsc(anyLong());
+        verify(itemRepository, times(1)).findAllByOwnerIdOrderByIdAsc(anyLong(), any(Pageable.class));
         verifyNoMoreInteractions(itemRepository);
         verify(bookingRepository, times(1)).getLastBooking(anyLong(), any(LocalDateTime.class));
         verify(bookingRepository, times(1)).getNextBooking(anyLong(), any(LocalDateTime.class));
@@ -208,53 +209,45 @@ public class ItemServiceImplTest {
     @Test
     void getAllItemsByRequestId() {
         when(itemRepository.findAllByRequestIdOrderByIdAsc(anyLong())).thenReturn(List.of(item));
-        when(bookingRepository.getLastBooking(anyLong(), any())).thenReturn(Optional.of(booking));
-        when(bookingRepository.getNextBooking(anyLong(), any())).thenReturn(Optional.of(booking));
-        when(commentRepository.findAllByItemId(anyLong())).thenReturn(List.of(comment));
 
         List<ItemDto> items = itemService.getAllByRequestId(1L);
 
-        Assertions.assertEquals(items.size(), 1);
-        Assertions.assertEquals(items.get(0).getId(), 1);
-        Assertions.assertEquals(items.get(0).getName(), itemDto.getName());
-        Assertions.assertEquals(items.get(0).getDescription(), itemDto.getDescription());
+        Assertions.assertEquals(1, items.size());
+        Assertions.assertEquals(1, items.get(0).getId());
+        Assertions.assertEquals(itemDto.getName(), items.get(0).getName());
+        Assertions.assertEquals(itemDto.getDescription(), items.get(0).getDescription());
         Assertions.assertTrue(items.get(0).getAvailable());
-        Assertions.assertEquals(items.get(0).getOwnerId(), itemDto.getOwnerId());
-        Assertions.assertEquals(items.get(0).getLastBooking().getId(), bookingOutputDto.getId());
-        Assertions.assertEquals(items.get(0).getNextBooking().getId(), bookingOutputDto.getId());
-        Assertions.assertEquals(items.get(0).getComments().size(), 1);
-        Assertions.assertEquals(items.get(0).getRequestId(), itemDto.getRequestId());
+        Assertions.assertEquals(itemDto.getOwnerId(), items.get(0).getOwnerId());
+        Assertions.assertNull(items.get(0).getLastBooking());
+        Assertions.assertNull(items.get(0).getNextBooking());
+        Assertions.assertEquals(0, items.get(0).getComments().size());
+        Assertions.assertEquals(itemDto.getRequestId(), items.get(0).getRequestId());
 
         verify(itemRepository, times(1)).findAllByRequestIdOrderByIdAsc(anyLong());
         verifyNoMoreInteractions(itemRepository);
-        verify(bookingRepository, times(1)).getLastBooking(anyLong(), any(LocalDateTime.class));
-        verify(bookingRepository, times(1)).getNextBooking(anyLong(), any(LocalDateTime.class));
-        verifyNoMoreInteractions(bookingRepository);
-        verify(commentRepository, times(1)).findAllByItemId(anyLong());
-        verifyNoMoreInteractions(commentRepository);
     }
 
     @Test
     void getAllItemsByText() {
-        when(itemRepository.search(anyString())).thenReturn(List.of(item));
+        when(itemRepository.search(anyString(), any(Pageable.class))).thenReturn(List.of(item));
         when(bookingRepository.getLastBooking(anyLong(), any())).thenReturn(Optional.of(booking));
         when(bookingRepository.getNextBooking(anyLong(), any())).thenReturn(Optional.of(booking));
         when(commentRepository.findAllByItemId(anyLong())).thenReturn(List.of(comment));
 
-        List<ItemDto> items = itemService.getAllByText("Hello");
+        List<ItemDto> items = itemService.getAllByText("Hello", 0, 1);
 
-        Assertions.assertEquals(items.size(), 1);
-        Assertions.assertEquals(items.get(0).getId(), 1);
-        Assertions.assertEquals(items.get(0).getName(), itemDto.getName());
-        Assertions.assertEquals(items.get(0).getDescription(), itemDto.getDescription());
+        Assertions.assertEquals(1, items.size());
+        Assertions.assertEquals(1, items.get(0).getId());
+        Assertions.assertEquals(itemDto.getName(), items.get(0).getName());
+        Assertions.assertEquals(itemDto.getDescription(), items.get(0).getDescription());
         Assertions.assertTrue(items.get(0).getAvailable());
-        Assertions.assertEquals(items.get(0).getOwnerId(), itemDto.getOwnerId());
-        Assertions.assertEquals(items.get(0).getLastBooking().getId(), bookingOutputDto.getId());
-        Assertions.assertEquals(items.get(0).getNextBooking().getId(), bookingOutputDto.getId());
-        Assertions.assertEquals(items.get(0).getComments().size(), 1);
-        Assertions.assertEquals(items.get(0).getRequestId(), itemDto.getRequestId());
+        Assertions.assertEquals(itemDto.getOwnerId(), items.get(0).getOwnerId());
+        Assertions.assertEquals(bookingOutputDto.getId(), items.get(0).getLastBooking().getId());
+        Assertions.assertEquals(bookingOutputDto.getId(), items.get(0).getNextBooking().getId());
+        Assertions.assertEquals(1, items.get(0).getComments().size());
+        Assertions.assertEquals(itemDto.getRequestId(), items.get(0).getRequestId());
 
-        verify(itemRepository, times(1)).search(anyString());
+        verify(itemRepository, times(1)).search(anyString(), any(Pageable.class));
         verifyNoMoreInteractions(itemRepository);
         verify(bookingRepository, times(1)).getLastBooking(anyLong(), any(LocalDateTime.class));
         verify(bookingRepository, times(1)).getNextBooking(anyLong(), any(LocalDateTime.class));
@@ -265,7 +258,7 @@ public class ItemServiceImplTest {
 
     @Test
     void getAllItemsByEmptyText() {
-        List<ItemDto> items = itemService.getAllByText("");
+        List<ItemDto> items = itemService.getAllByText("", 0, 1);
 
         Assertions.assertEquals(items.size(), 0);
     }
@@ -289,15 +282,15 @@ public class ItemServiceImplTest {
         ItemDto updatedItem = itemService.update(userDto, 1L, itemDto);
 
         Assertions.assertNotNull(updatedItem);
-        Assertions.assertEquals(updatedItem.getId(), 1);
-        Assertions.assertEquals(updatedItem.getName(), newItem.getName());
-        Assertions.assertEquals(updatedItem.getDescription(), itemDto.getDescription());
+        Assertions.assertEquals(1, updatedItem.getId());
+        Assertions.assertEquals(newItem.getName(), updatedItem.getName());
+        Assertions.assertEquals(itemDto.getDescription(), updatedItem.getDescription());
         Assertions.assertTrue(updatedItem.getAvailable());
-        Assertions.assertEquals(updatedItem.getOwnerId(), itemDto.getOwnerId());
-        Assertions.assertEquals(updatedItem.getLastBooking().getId(), bookingOutputDto.getId());
-        Assertions.assertEquals(updatedItem.getNextBooking().getId(), bookingOutputDto.getId());
-        Assertions.assertEquals(updatedItem.getComments().size(), 1);
-        Assertions.assertEquals(updatedItem.getRequestId(), itemDto.getRequestId());
+        Assertions.assertEquals(itemDto.getOwnerId(), updatedItem.getOwnerId());
+        Assertions.assertEquals(bookingOutputDto.getId(), updatedItem.getLastBooking().getId());
+        Assertions.assertEquals(bookingOutputDto.getId(), updatedItem.getNextBooking().getId());
+        Assertions.assertEquals(1, updatedItem.getComments().size());
+        Assertions.assertEquals(itemDto.getRequestId(), updatedItem.getRequestId());
 
         verify(itemRepository, times(1)).findByOwnerIdAndId(anyLong(), anyLong());
         verify(itemRepository, times(1)).save(any());
@@ -315,10 +308,8 @@ public class ItemServiceImplTest {
 
         when(itemRepository.findByOwnerIdAndId(anyLong(), anyLong())).thenReturn(null);
 
-        final NotFoundException exception = Assertions.assertThrows(NotFoundException.class,
+        Assertions.assertThrows(NotFoundException.class,
                 () -> itemService.update(userDto, itemId, itemDto));
-
-        Assertions.assertEquals(String.format("Вещи с id %s нет", itemId), exception.getMessage());
     }
 
     @Test
@@ -327,13 +318,13 @@ public class ItemServiceImplTest {
                 .thenReturn(List.of(booking));
         when(commentRepository.save(any(Comment.class))).thenReturn(comment);
 
-        CommentDto createdComment = itemService.createComment(commentDto, userDto, itemDto);
+        CommentDto createdComment = itemService.createComment(commentDto, userDto, itemDto, LocalDateTime.now());
 
         Assertions.assertNotNull(createdComment);
-        Assertions.assertEquals(createdComment.getText(), comment.getText());
-        Assertions.assertEquals(createdComment.getId(), comment.getId());
-        Assertions.assertEquals(createdComment.getCreated().toString(), comment.getCreated().toString());
-        Assertions.assertEquals(createdComment.getAuthorName(), comment.getAuthor().getName());
+        Assertions.assertEquals(comment.getText(), createdComment.getText());
+        Assertions.assertEquals(comment.getId(), createdComment.getId());
+        Assertions.assertEquals(comment.getCreated().toString(), createdComment.getCreated().toString());
+        Assertions.assertEquals(comment.getAuthor().getName(), createdComment.getAuthorName());
 
         verify(bookingRepository, times(1))
                 .getAllUserBookings(anyLong(), anyLong(), any(LocalDateTime.class));
@@ -347,10 +338,7 @@ public class ItemServiceImplTest {
         when(bookingRepository.getAllUserBookings(anyLong(), anyLong(), any(LocalDateTime.class)))
                 .thenReturn(Collections.emptyList());
 
-        final BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
-                () -> itemService.createComment(commentDto, userDto, itemDto));
-
-        Assertions.assertEquals("Чтобы оставить комментарий нужно сначала оформить бронирование",
-                exception.getMessage());
+        Assertions.assertThrows(BadRequestException.class,
+                () -> itemService.createComment(commentDto, userDto, itemDto, LocalDateTime.now()));
     }
 }

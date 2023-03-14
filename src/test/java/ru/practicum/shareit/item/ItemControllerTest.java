@@ -21,8 +21,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -32,13 +31,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ItemControllerTest {
 
     @Autowired
-    ObjectMapper mapper;
+    private ObjectMapper mapper;
 
     @MockBean
-    ItemService itemService;
+    private ItemService itemService;
 
     @MockBean
-    UserService userService;
+    private UserService userService;
 
     @Autowired
     private MockMvc mvc;
@@ -94,12 +93,14 @@ public class ItemControllerTest {
 
     @Test
     void getAllItemsByUserId() throws Exception {
-        when(itemService.getAllByUserId(any())).thenReturn(List.of(itemDto));
+        when(itemService.getAllByUserId(any(), anyInt(), anyInt())).thenReturn(List.of(itemDto));
 
         mvc.perform(get("/items")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", "1"))
+                        .header("X-Sharer-User-Id", "1")
+                        .param("from", "0")
+                        .param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].id", is(itemDto.getId()), Long.class))
@@ -116,8 +117,8 @@ public class ItemControllerTest {
     @Test
     void addComment() throws Exception {
         when(itemService.getByItemIdAndUserId(anyLong(), anyLong())).thenReturn(itemDto);
-        when(itemService.createComment(any(CommentDto.class), any(UserDto.class), any(ItemDto.class)))
-                .thenReturn(commentDto);
+        when(itemService.createComment(any(CommentDto.class), any(UserDto.class),
+                any(ItemDto.class), any(LocalDateTime.class))).thenReturn(commentDto);
 
         mvc.perform(post("/items/{id}/comment", "1")
                         .content(mapper.writeValueAsString(commentDto))
@@ -153,13 +154,15 @@ public class ItemControllerTest {
 
     @Test
     void getItemByText() throws Exception {
-        when(itemService.getAllByText(any())).thenReturn(List.of(itemDto));
+        when(itemService.getAllByText(any(), anyInt(), anyInt())).thenReturn(List.of(itemDto));
 
         mvc.perform(get("/items/search")
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-Sharer-User-Id", "1")
-                        .param("text", "text"))
+                        .param("text", "text")
+                        .param("from", "0")
+                        .param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].id", is(itemDto.getId()), Long.class))

@@ -43,9 +43,9 @@ public class UserServiceImplTest {
         UserDto createdUser = userService.create(userDto);
 
         Assertions.assertNotNull(createdUser);
-        Assertions.assertEquals(createdUser.getId(), 1);
-        Assertions.assertEquals(createdUser.getName(), userDto.getName());
-        Assertions.assertEquals(createdUser.getEmail(), userDto.getEmail());
+        Assertions.assertEquals(1, createdUser.getId());
+        Assertions.assertEquals(userDto.getName(), createdUser.getName());
+        Assertions.assertEquals(userDto.getEmail(), createdUser.getEmail());
 
         verify(userRepository, times(1)).save(any(User.class));
         verifyNoMoreInteractions(userRepository);
@@ -58,10 +58,10 @@ public class UserServiceImplTest {
         List<UserDto> users = userService.findAll();
 
         Assertions.assertNotNull(users);
-        Assertions.assertEquals(users.size(), 1);
-        Assertions.assertEquals(users.get(0).getId(), 1);
-        Assertions.assertEquals(users.get(0).getName(), userDto.getName());
-        Assertions.assertEquals(users.get(0).getEmail(), userDto.getEmail());
+        Assertions.assertEquals(1, users.size());
+        Assertions.assertEquals(1, users.get(0).getId());
+        Assertions.assertEquals(userDto.getName(), users.get(0).getName());
+        Assertions.assertEquals(userDto.getEmail(), users.get(0).getEmail());
 
         verify(userRepository, times(1)).findAll();
         verifyNoMoreInteractions(userRepository);
@@ -74,9 +74,9 @@ public class UserServiceImplTest {
         UserDto user = userService.findById(1L);
 
         Assertions.assertNotNull(user);
-        Assertions.assertEquals(user.getId(), 1);
-        Assertions.assertEquals(user.getName(), userDto.getName());
-        Assertions.assertEquals(user.getEmail(), userDto.getEmail());
+        Assertions.assertEquals(1, user.getId());
+        Assertions.assertEquals(userDto.getName(), user.getName());
+        Assertions.assertEquals(userDto.getEmail(), user.getEmail());
 
         verify(userRepository, times(1)).findById(anyLong());
         verifyNoMoreInteractions(userRepository);
@@ -93,9 +93,9 @@ public class UserServiceImplTest {
         UserDto updatedUser = userService.updateById(newUpdatedUserDto, 1L);
 
         Assertions.assertNotNull(updatedUser);
-        Assertions.assertEquals(updatedUser.getId(), 1);
-        Assertions.assertEquals(updatedUser.getName(), newUpdatedUserDto.getName());
-        Assertions.assertEquals(updatedUser.getEmail(), newUpdatedUserDto.getEmail());
+        Assertions.assertEquals(1, updatedUser.getId());
+        Assertions.assertEquals(newUpdatedUserDto.getName(), updatedUser.getName());
+        Assertions.assertEquals(newUpdatedUserDto.getEmail(), updatedUser.getEmail());
 
         verify(userRepository, times(1)).save(any(User.class));
         verify(userRepository, times(1)).findById(anyLong());
