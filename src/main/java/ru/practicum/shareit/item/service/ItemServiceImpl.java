@@ -20,9 +20,7 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,32 +48,29 @@ public class ItemServiceImpl implements ItemService {
         });
 
         if (item.getOwner().getId().equals(userId)) {
-            return ItemMapper.toItemDto(item, getLastBooking(item),
-                    getNextBooking(item), getAllCommentsByItemId(itemId));
+            return ItemMapper.toItemDto(itemRepository.save(item),
+                    getBooking(item, getLastBookings(List.of(item.getId()))),
+                    getBooking(item, getNextBookings(List.of(item.getId()))));
         }
 
-        return ItemMapper.toItemDto(item, getAllCommentsByItemId(itemId));
+        return ItemMapper.toItemDto(item);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ItemDto> getAllByUserId(Long userId, Integer from, Integer size) {
         Pageable pageable = PageRequest.of(from / size, size);
+        List<Item> items = itemRepository.findAllByOwnerIdOrderByIdAsc(userId, pageable);
 
-        return itemRepository.findAllByOwnerIdOrderByIdAsc(userId, pageable)
-                .stream()
-                .map(item -> ItemMapper.toItemDto(item, getLastBooking(item),
-                        getNextBooking(item), getAllCommentsByItemId(item.getId())))
-                .collect(Collectors.toList());
+        return getItemDtos(items);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ItemDto> getAllByRequestId(Long requestId) {
-        return itemRepository.findAllByRequestIdOrderByIdAsc(requestId)
-                .stream()
-                .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
+        List<Item> items = itemRepository.findAllByRequestIdOrderByIdAsc(requestId);
+
+        return getItemDtos(items);
     }
 
     @Override
@@ -87,11 +82,9 @@ public class ItemServiceImpl implements ItemService {
             return Collections.emptyList();
         }
 
-        return itemRepository.search(text, pageable)
-                .stream()
-                .map(item -> ItemMapper.toItemDto(item, getLastBooking(item),
-                        getNextBooking(item), getAllCommentsByItemId(item.getId())))
-                .collect(Collectors.toList());
+        List<Item> items = itemRepository.search(text, pageable);
+
+        return getItemDtos(items);
     }
 
     @Override
@@ -109,8 +102,9 @@ public class ItemServiceImpl implements ItemService {
         item.setDescription(Objects.requireNonNullElse(itemFromDto.getDescription(), item.getDescription()));
         item.setAvailable(Objects.requireNonNullElse(itemFromDto.getAvailable(), item.getAvailable()));
 
-        return ItemMapper.toItemDto(itemRepository.save(item), getLastBooking(item),
-                getNextBooking(item), getAllCommentsByItemId(item.getId()));
+        return ItemMapper.toItemDto(itemRepository.save(item),
+                getBooking(item, getLastBookings(List.of(item.getId()))),
+                getBooking(item, getNextBookings(List.of(item.getId()))));
     }
 
     @Override
@@ -128,27 +122,46 @@ public class ItemServiceImpl implements ItemService {
         return CommentMapper.toCommentDto(commentRepository.save(comment));
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<CommentDto> getAllCommentsByItemId(Long itemId) {
-        List<Comment> comments = commentRepository.findAllByItemId(itemId);
-        return comments
+    private Map<Long, List<Booking>> getLastBookings(List<Long> itemIds) {
+        return bookingRepository
+                .getLastBooking(itemIds, LocalDateTime.now())
                 .stream()
-                .map(CommentMapper::toCommentDto)
+                .collect(Collectors.groupingBy(booking -> booking.getItem().getId()));
+    }
+
+    private Map<Long, List<Booking>> getNextBookings(List<Long> itemIds) {
+        return bookingRepository
+                .getNextBooking(itemIds, LocalDateTime.now())
+                .stream()
+                .collect(Collectors.groupingBy(booking -> booking.getItem().getId()));
+    }
+
+    private BookerInfoDto getBooking(Item item, Map<Long, List<Booking>> bookingsMap) {
+        Optional<Booking> booking = Optional
+                .ofNullable(bookingsMap.get(item.getId()))
+                .orElseGet(Collections::emptyList)
+                .stream()
+                .findFirst();
+
+        return booking.map(BookingMapper::toBookingInfoDto).orElse(null);
+    }
+
+    private List<ItemDto> getItemDtos(List<Item> items) {
+        List<Long> itemIds = getItemsIds(items);
+        Map<Long, List<Booking>> lastBookings = getLastBookings(itemIds);
+        Map<Long, List<Booking>> nextBookings = getNextBookings(itemIds);
+
+        return items
+                .stream()
+                .map(item -> ItemMapper.toItemDto(item, getBooking(item, lastBookings),
+                        getBooking(item, nextBookings)))
                 .collect(Collectors.toList());
     }
 
-    private BookerInfoDto getLastBooking(Item item) {
-        return bookingRepository
-                .getLastBooking(item.getId(), LocalDateTime.now())
-                .map(BookingMapper::toBookingInfoDto)
-                .orElse(null);
-    }
-
-    private BookerInfoDto getNextBooking(Item item) {
-        return bookingRepository
-                .getNextBooking(item.getId(), LocalDateTime.now())
-                .map(BookingMapper::toBookingInfoDto)
-                .orElse(null);
+    private List<Long> getItemsIds(List<Item> items) {
+        return items
+                .stream()
+                .map(Item::getId)
+                .collect(Collectors.toList());
     }
 }

@@ -120,7 +120,8 @@ public class BookingServiceImplTest {
             "Какое-то описание",
             true,
             1L,
-            user);
+            user,
+            new ArrayList<>());
 
     private final Booking booking = new Booking(1L,
             start,

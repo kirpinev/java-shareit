@@ -8,7 +8,6 @@ import ru.practicum.shareit.booking.model.Booking;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
@@ -77,15 +76,15 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "ORDER BY b.start DESC")
     List<Booking> getAllPastBookingsByOwnerId(Long ownerId, LocalDateTime currentTime, Pageable pageable);
 
-    @Query(value = "SELECT * FROM bookings b JOIN items i ON i.id = b.item_id "
-            + "WHERE b.item_id = :itemId AND b.start_date < :currentTime " +
-            "ORDER BY b.end_date DESC LIMIT 1",
+    @Query(value = "SELECT * FROM bookings b "
+            + "WHERE b.item_id in :itemId AND b.start_date < :currentTime " +
+            "ORDER BY b.end_date DESC",
             nativeQuery = true)
-    Optional<Booking> getLastBooking(Long itemId, LocalDateTime currentTime);
+    List<Booking> getLastBooking(List<Long> itemId, LocalDateTime currentTime);
 
-    @Query(value = "SELECT * FROM bookings b JOIN items i ON i.id = b.item_id "
-            + "WHERE b.item_id = :itemId AND b.start_date > :currentTime AND b.status != 'REJECTED' " +
-            "ORDER BY b.start_date ASC LIMIT 1",
+    @Query(value = "SELECT * FROM bookings b "
+            + "WHERE b.item_id in :itemId AND b.start_date > :currentTime AND b.status != 'REJECTED' " +
+            "ORDER BY b.start_date ASC",
             nativeQuery = true)
-    Optional<Booking> getNextBooking(Long itemId, LocalDateTime currentTime);
+    List<Booking> getNextBooking(List<Long> itemId, LocalDateTime currentTime);
 }

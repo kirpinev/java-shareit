@@ -21,6 +21,4 @@ public interface ItemService {
     ItemDto update(UserDto userDto, Long itemId, ItemDto item);
 
     CommentDto createComment(CommentDto commentDto, UserDto userDto, ItemDto itemDto, LocalDateTime time);
-
-    List<CommentDto> getAllCommentsByItemId(Long itemId);
 }

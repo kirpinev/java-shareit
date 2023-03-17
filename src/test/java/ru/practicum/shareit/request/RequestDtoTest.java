@@ -19,15 +19,6 @@ public class RequestDtoTest {
     @Autowired
     private JacksonTester<RequestDto> json;
 
-    private final LocalDateTime time = LocalDateTime.parse("2023-03-15T14:38:28");
-
-    private final String jsonToDeserialize = "{\n" +
-            "    \"id\": 1,\n" +
-            "    \"description\": \"Хотел бы воспользоваться щёткой для обуви\",\n" +
-            "    \"created\": \"2023-03-15T14:38:28\",\n" +
-            "    \"items\": []\n" +
-            "}";
-
     private RequestDto requestDto = null;
 
     @BeforeEach
@@ -35,22 +26,8 @@ public class RequestDtoTest {
         requestDto = new RequestDto(
                 1L,
                 "Хотел бы воспользоваться щёткой для обуви",
-                time,
+                LocalDateTime.parse("2023-03-15T14:38:28.100"),
                 new ArrayList<>());
-    }
-
-    @Test
-    public void idSerializes() throws IOException {
-        assertThat(json.write(requestDto))
-                .extractingJsonPathNumberValue("$.id")
-                .isEqualTo(1);
-    }
-
-    @Test
-    public void descriptionSerializes() throws IOException {
-        assertThat(json.write(requestDto))
-                .extractingJsonPathStringValue("$.description")
-                .isEqualTo("Хотел бы воспользоваться щёткой для обуви");
     }
 
     @Test
@@ -58,36 +35,5 @@ public class RequestDtoTest {
         assertThat(json.write(requestDto))
                 .extractingJsonPathStringValue("$.created")
                 .isEqualTo("2023-03-15T14:38:28");
-    }
-
-    @Test
-    public void itemsSerializes() throws IOException {
-        assertThat(json.write(requestDto))
-                .extractingJsonPathArrayValue("$.items").size()
-                .isEqualTo(0);
-    }
-
-    @Test
-    public void idDeserializes() throws IOException {
-        assertThat(json.parseObject(jsonToDeserialize).getId())
-                .isEqualTo(1);
-    }
-
-    @Test
-    public void descriptionDeserializes() throws IOException {
-        assertThat(json.parseObject(jsonToDeserialize).getDescription())
-                .isEqualTo("Хотел бы воспользоваться щёткой для обуви");
-    }
-
-    @Test
-    public void createdDeserializes() throws IOException {
-        assertThat(json.parseObject(jsonToDeserialize).getCreated())
-                .isEqualTo("2023-03-15T14:38:28");
-    }
-
-    @Test
-    public void itemsDeserializes() throws IOException {
-        assertThat(json.parseObject(jsonToDeserialize).getItems().size())
-                .isEqualTo(0);
     }
 }

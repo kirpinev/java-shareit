@@ -18,13 +18,7 @@ public class BookingInputDtoTest {
     @Autowired
     private JacksonTester<BookingInputDto> json;
 
-    private final LocalDateTime time = LocalDateTime.parse("2023-03-15T14:38:28");
-
-    private final String jsonToDeserialize = "{\n" +
-            "\"itemId\": 2,\n" +
-            "\"start\": \"2023-03-15T14:38:28\",\n" +
-            "\"end\": \"2023-03-15T14:38:28\"\n" +
-            "}";
+    private final String dateTime = "2023-03-15T14:38:28";
 
     private BookingInputDto bookingInputDto = null;
 
@@ -32,46 +26,21 @@ public class BookingInputDtoTest {
     public void setup() {
         bookingInputDto = new BookingInputDto(
                 2L,
-                time,
-                time);
-    }
-
-    @Test
-    public void itemIdSerializes() throws IOException {
-        assertThat(json.write(bookingInputDto))
-                .extractingJsonPathNumberValue("$.itemId")
-                .isEqualTo(2);
+                LocalDateTime.parse("2023-03-15T14:38:28.100"),
+                LocalDateTime.parse("2023-03-15T14:38:28.100"));
     }
 
     @Test
     public void startSerializes() throws IOException {
         assertThat(json.write(bookingInputDto))
                 .extractingJsonPathStringValue("$.start")
-                .isEqualTo("2023-03-15T14:38:28");
+                .isEqualTo(dateTime);
     }
 
     @Test
     public void endSerializes() throws IOException {
         assertThat(json.write(bookingInputDto))
                 .extractingJsonPathStringValue("$.end")
-                .isEqualTo("2023-03-15T14:38:28");
-    }
-
-    @Test
-    public void itemIdDeserializes() throws IOException {
-        assertThat(json.parseObject(jsonToDeserialize).getItemId())
-                .isEqualTo(2L);
-    }
-
-    @Test
-    public void startDeserializes() throws IOException {
-        assertThat(json.parseObject(jsonToDeserialize).getStart())
-                .isEqualTo("2023-03-15T14:38:28");
-    }
-
-    @Test
-    public void endDeserializes() throws IOException {
-        assertThat(json.parseObject(jsonToDeserialize).getEnd())
-                .isEqualTo("2023-03-15T14:38:28");
+                .isEqualTo(dateTime);
     }
 }

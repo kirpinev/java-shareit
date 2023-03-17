@@ -38,7 +38,8 @@ public class ItemRepositoryTest {
             "Какое-то описание",
             true,
             1L,
-            user);
+            user,
+            null);
 
     private final Request request = new Request(
             null,

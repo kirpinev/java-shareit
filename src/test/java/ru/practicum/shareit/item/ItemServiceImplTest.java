@@ -62,7 +62,8 @@ public class ItemServiceImplTest {
             "Какое-то описание",
             true,
             1L,
-            user);
+            user,
+            new ArrayList<>());
 
     private final Comment comment = new Comment(
             1L,
@@ -130,9 +131,9 @@ public class ItemServiceImplTest {
     @Test
     void getByItemIdAndUserId() {
         when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
-        when(bookingRepository.getLastBooking(anyLong(), any())).thenReturn(Optional.of(booking));
-        when(bookingRepository.getNextBooking(anyLong(), any())).thenReturn(Optional.of(booking));
-        when(commentRepository.findAllByItemId(anyLong())).thenReturn(List.of(comment));
+        when(itemRepository.save(any(Item.class))).thenReturn(item);
+        when(bookingRepository.getLastBooking(anyList(), any(LocalDateTime.class))).thenReturn(List.of(booking));
+        when(bookingRepository.getNextBooking(anyList(), any(LocalDateTime.class))).thenReturn(List.of(booking));
 
         ItemDto itemById = itemService.getByItemIdAndUserId(1L, 1L);
 
@@ -144,19 +145,20 @@ public class ItemServiceImplTest {
         Assertions.assertEquals(itemDto.getOwnerId(), itemById.getOwnerId());
         Assertions.assertEquals(bookingOutputDto.getId(), itemById.getLastBooking().getId());
         Assertions.assertEquals(bookingOutputDto.getId(), itemById.getNextBooking().getId());
-        Assertions.assertEquals(1, itemById.getComments().size());
+        Assertions.assertEquals(0, itemById.getComments().size());
         Assertions.assertEquals(itemDto.getRequestId(), itemById.getRequestId());
 
         verify(itemRepository, times(1)).findById(anyLong());
+        verify(itemRepository, times(1)).save(any(Item.class));
         verifyNoMoreInteractions(itemRepository);
-        verify(commentRepository, times(1)).findAllByItemId(anyLong());
-        verifyNoMoreInteractions(commentRepository);
+        verify(bookingRepository, times(1)).getLastBooking(anyList(), any(LocalDateTime.class));
+        verify(bookingRepository, times(1)).getNextBooking(anyList(), any(LocalDateTime.class));
+        verifyNoMoreInteractions(bookingRepository);
     }
 
     @Test
     void getByItemIdAndUserIdWithoutBookings() {
         when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
-        when(commentRepository.findAllByItemId(anyLong())).thenReturn(List.of(comment));
 
         ItemDto itemById = itemService.getByItemIdAndUserId(1L, 2L);
 
@@ -168,21 +170,18 @@ public class ItemServiceImplTest {
         Assertions.assertEquals(itemDto.getOwnerId(), itemById.getOwnerId());
         Assertions.assertNull(itemById.getLastBooking());
         Assertions.assertNull(itemById.getNextBooking());
-        Assertions.assertEquals(1, itemById.getComments().size());
+        Assertions.assertEquals(0, itemById.getComments().size());
         Assertions.assertEquals(itemDto.getRequestId(), itemById.getRequestId());
 
         verify(itemRepository, times(1)).findById(anyLong());
         verifyNoMoreInteractions(itemRepository);
-        verify(commentRepository, times(1)).findAllByItemId(anyLong());
-        verifyNoMoreInteractions(commentRepository);
     }
 
     @Test
     void getAllItemsByUserId() {
         when(itemRepository.findAllByOwnerIdOrderByIdAsc(anyLong(), any(Pageable.class))).thenReturn(List.of(item));
-        when(bookingRepository.getLastBooking(anyLong(), any())).thenReturn(Optional.of(booking));
-        when(bookingRepository.getNextBooking(anyLong(), any())).thenReturn(Optional.of(booking));
-        when(commentRepository.findAllByItemId(anyLong())).thenReturn(List.of(comment));
+        when(bookingRepository.getLastBooking(anyList(), any(LocalDateTime.class))).thenReturn(List.of(booking));
+        when(bookingRepository.getNextBooking(anyList(), any(LocalDateTime.class))).thenReturn(List.of(booking));
 
         List<ItemDto> items = itemService.getAllByUserId(1L, 0, 1);
 
@@ -194,16 +193,14 @@ public class ItemServiceImplTest {
         Assertions.assertEquals(itemDto.getOwnerId(), items.get(0).getOwnerId());
         Assertions.assertEquals(bookingOutputDto.getId(), items.get(0).getLastBooking().getId());
         Assertions.assertEquals(bookingOutputDto.getId(), items.get(0).getNextBooking().getId());
-        Assertions.assertEquals(1, items.get(0).getComments().size());
+        Assertions.assertEquals(0, items.get(0).getComments().size());
         Assertions.assertEquals(itemDto.getRequestId(), items.get(0).getRequestId());
 
         verify(itemRepository, times(1)).findAllByOwnerIdOrderByIdAsc(anyLong(), any(Pageable.class));
         verifyNoMoreInteractions(itemRepository);
-        verify(bookingRepository, times(1)).getLastBooking(anyLong(), any(LocalDateTime.class));
-        verify(bookingRepository, times(1)).getNextBooking(anyLong(), any(LocalDateTime.class));
+        verify(bookingRepository, times(1)).getLastBooking(anyList(), any(LocalDateTime.class));
+        verify(bookingRepository, times(1)).getNextBooking(anyList(), any(LocalDateTime.class));
         verifyNoMoreInteractions(bookingRepository);
-        verify(commentRepository, times(1)).findAllByItemId(anyLong());
-        verifyNoMoreInteractions(commentRepository);
     }
 
     @Test
@@ -230,9 +227,8 @@ public class ItemServiceImplTest {
     @Test
     void getAllItemsByText() {
         when(itemRepository.search(anyString(), any(Pageable.class))).thenReturn(List.of(item));
-        when(bookingRepository.getLastBooking(anyLong(), any())).thenReturn(Optional.of(booking));
-        when(bookingRepository.getNextBooking(anyLong(), any())).thenReturn(Optional.of(booking));
-        when(commentRepository.findAllByItemId(anyLong())).thenReturn(List.of(comment));
+        when(bookingRepository.getLastBooking(anyList(), any(LocalDateTime.class))).thenReturn(List.of(booking));
+        when(bookingRepository.getNextBooking(anyList(), any(LocalDateTime.class))).thenReturn(List.of(booking));
 
         List<ItemDto> items = itemService.getAllByText("Hello", 0, 1);
 
@@ -244,16 +240,14 @@ public class ItemServiceImplTest {
         Assertions.assertEquals(itemDto.getOwnerId(), items.get(0).getOwnerId());
         Assertions.assertEquals(bookingOutputDto.getId(), items.get(0).getLastBooking().getId());
         Assertions.assertEquals(bookingOutputDto.getId(), items.get(0).getNextBooking().getId());
-        Assertions.assertEquals(1, items.get(0).getComments().size());
+        Assertions.assertEquals(0, items.get(0).getComments().size());
         Assertions.assertEquals(itemDto.getRequestId(), items.get(0).getRequestId());
 
         verify(itemRepository, times(1)).search(anyString(), any(Pageable.class));
         verifyNoMoreInteractions(itemRepository);
-        verify(bookingRepository, times(1)).getLastBooking(anyLong(), any(LocalDateTime.class));
-        verify(bookingRepository, times(1)).getNextBooking(anyLong(), any(LocalDateTime.class));
+        verify(bookingRepository, times(1)).getLastBooking(anyList(), any(LocalDateTime.class));
+        verify(bookingRepository, times(1)).getNextBooking(anyList(), any(LocalDateTime.class));
         verifyNoMoreInteractions(bookingRepository);
-        verify(commentRepository, times(1)).findAllByItemId(anyLong());
-        verifyNoMoreInteractions(commentRepository);
     }
 
     @Test
@@ -271,13 +265,13 @@ public class ItemServiceImplTest {
                 "Какое-то описание",
                 true,
                 1L,
-                user);
+                user,
+                List.of(comment));
 
         when(itemRepository.findByOwnerIdAndId(anyLong(), anyLong())).thenReturn(item);
         when(itemRepository.save(any())).thenReturn(newItem);
-        when(bookingRepository.getLastBooking(anyLong(), any())).thenReturn(Optional.of(booking));
-        when(bookingRepository.getNextBooking(anyLong(), any())).thenReturn(Optional.of(booking));
-        when(commentRepository.findAllByItemId(anyLong())).thenReturn(List.of(comment));
+        when(bookingRepository.getLastBooking(anyList(), any(LocalDateTime.class))).thenReturn(List.of(booking));
+        when(bookingRepository.getNextBooking(anyList(), any(LocalDateTime.class))).thenReturn(List.of(booking));
 
         ItemDto updatedItem = itemService.update(userDto, 1L, itemDto);
 
@@ -295,11 +289,9 @@ public class ItemServiceImplTest {
         verify(itemRepository, times(1)).findByOwnerIdAndId(anyLong(), anyLong());
         verify(itemRepository, times(1)).save(any());
         verifyNoMoreInteractions(itemRepository);
-        verify(bookingRepository, times(1)).getLastBooking(anyLong(), any(LocalDateTime.class));
-        verify(bookingRepository, times(1)).getNextBooking(anyLong(), any(LocalDateTime.class));
+        verify(bookingRepository, times(1)).getLastBooking(anyList(), any(LocalDateTime.class));
+        verify(bookingRepository, times(1)).getNextBooking(anyList(), any(LocalDateTime.class));
         verifyNoMoreInteractions(bookingRepository);
-        verify(commentRepository, times(1)).findAllByItemId(anyLong());
-        verifyNoMoreInteractions(commentRepository);
     }
 
     @Test
