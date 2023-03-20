@@ -2,7 +2,7 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.Value;
 import org.springframework.format.annotation.DateTimeFormat;
-import ru.practicum.shareit.Create;
+import ru.practicum.shareit.validation.group.Create;
 
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;

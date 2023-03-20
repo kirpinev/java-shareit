@@ -1,20 +1,20 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.Create;
-import ru.practicum.shareit.Update;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.validation.group.Create;
+import ru.practicum.shareit.validation.group.Update;
 
+import javax.validation.constraints.Min;
+import java.time.LocalDateTime;
 import java.util.List;
 
-@Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/items")
@@ -31,10 +31,12 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> getAll(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public List<ItemDto> getAll(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                @RequestParam(value = "from", required = false, defaultValue = "0") @Min(0) Integer from,
+                                @RequestParam(value = "size", required = false, defaultValue = "10") @Min(1) Integer size) {
         userService.findById(userId);
 
-        return itemService.getAllByUserId(userId);
+        return itemService.getAllByUserId(userId, from, size);
     }
 
     @PostMapping("/{itemId}/comment")
@@ -44,7 +46,7 @@ public class ItemController {
         UserDto userDto = userService.findById(userId);
         ItemDto itemDto = itemService.getByItemIdAndUserId(itemId, userId);
 
-        return itemService.createComment(commentDto, userDto, itemDto);
+        return itemService.createComment(commentDto, userDto, itemDto, LocalDateTime.now());
     }
 
     @GetMapping("/{itemId}")
@@ -57,10 +59,12 @@ public class ItemController {
 
     @GetMapping("/search")
     public List<ItemDto> getByText(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                   @RequestParam(name = "text") String text) {
+                                   @RequestParam(name = "text") String text,
+                                   @RequestParam(value = "from", required = false, defaultValue = "0") @Min(0) Integer from,
+                                   @RequestParam(value = "size", required = false, defaultValue = "10") @Min(1) Integer size) {
         userService.findById(userId);
 
-        return itemService.getAllByText(text);
+        return itemService.getAllByText(text, from, size);
     }
 
     @PatchMapping("/{itemId}")

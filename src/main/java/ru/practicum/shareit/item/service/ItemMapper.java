@@ -1,19 +1,18 @@
 package ru.practicum.shareit.item.service;
 
 import ru.practicum.shareit.item.dto.BookerInfoDto;
-import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class ItemMapper {
 
+    private ItemMapper() {
+    }
+
     public static ItemDto toItemDto(Item item, BookerInfoDto lastBooking,
-                                    BookerInfoDto nextBooking, List<CommentDto> commentDtos) {
+                                    BookerInfoDto nextBooking) {
         return new ItemDto(item.getId(),
                 item.getName(),
                 item.getDescription(),
@@ -21,18 +20,8 @@ public class ItemMapper {
                 item.getOwner().getId(),
                 lastBooking,
                 nextBooking,
-                commentDtos);
-    }
-
-    public static ItemDto toItemDto(Item item, List<CommentDto> commentDtos) {
-        return new ItemDto(item.getId(),
-                item.getName(),
-                item.getDescription(),
-                item.getAvailable(),
-                item.getOwner().getId(),
-                null,
-                null,
-                commentDtos);
+                CommentMapper.toCommentDto(item.getComments()),
+                item.getRequestId());
     }
 
     public static ItemDto toItemDto(Item item) {
@@ -43,7 +32,8 @@ public class ItemMapper {
                 item.getOwner().getId(),
                 null,
                 null,
-                new ArrayList<>());
+                CommentMapper.toCommentDto(item.getComments()),
+                item.getRequestId());
     }
 
     public static Item toItem(ItemDto itemDto, UserDto userDto) {
@@ -58,6 +48,7 @@ public class ItemMapper {
         item.setDescription(itemDto.getDescription());
         item.setName(itemDto.getName());
         item.setAvailable(itemDto.getAvailable());
+        item.setRequestId(itemDto.getRequestId());
         item.setOwner(user);
 
         return item;

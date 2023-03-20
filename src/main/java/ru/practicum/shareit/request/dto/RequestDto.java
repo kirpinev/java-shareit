@@ -1,23 +1,22 @@
-package ru.practicum.shareit.booking.dto;
+package ru.practicum.shareit.request.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.validation.group.Create;
 
+import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Value
-public class BookingOutputDto {
+public class RequestDto {
     Long id;
+    @NotBlank(groups = {Create.class})
+    String description;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-ddTHH:mm:ss")
-    LocalDateTime start;
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-ddTHH:mm:ss")
-    LocalDateTime end;
-    String status;
-    UserDto booker;
-    ItemDto item;
+    LocalDateTime created;
+    List<ItemDto> items;
 }

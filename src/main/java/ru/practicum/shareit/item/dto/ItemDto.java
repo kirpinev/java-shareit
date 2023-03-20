@@ -1,8 +1,8 @@
 package ru.practicum.shareit.item.dto;
 
 import lombok.Value;
-import ru.practicum.shareit.Create;
-import ru.practicum.shareit.Update;
+import ru.practicum.shareit.validation.group.Create;
+import ru.practicum.shareit.validation.group.Update;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -24,4 +24,5 @@ public class ItemDto {
     BookerInfoDto lastBooking;
     BookerInfoDto nextBooking;
     List<CommentDto> comments;
+    Long requestId;
 }
