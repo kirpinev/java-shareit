@@ -18,7 +18,7 @@ public class BookingInfoDtoTest {
     @Autowired
     private JacksonTester<BookerInfoDto> json;
 
-    private final String dateTime = "2023-03-15T14:38:28";
+    private static final String DATE_TIME = "2023-03-15T14:38:28";
 
     private BookerInfoDto bookerInfoDto = null;
 
@@ -36,13 +36,13 @@ public class BookingInfoDtoTest {
     public void startSerializes() throws IOException {
         assertThat(json.write(bookerInfoDto))
                 .extractingJsonPathStringValue("$.start")
-                .isEqualTo(dateTime);
+                .isEqualTo(DATE_TIME);
     }
 
     @Test
     public void endSerializes() throws IOException {
         assertThat(json.write(bookerInfoDto))
                 .extractingJsonPathStringValue("$.end")
-                .isEqualTo(dateTime);
+                .isEqualTo(DATE_TIME);
     }
 }
