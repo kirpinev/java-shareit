@@ -21,21 +21,20 @@ public class ErrorHandler {
     @ExceptionHandler({MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
-        String field = Objects.requireNonNull(e.getBindingResult().getFieldError()).getField();
         String errorMessage = e.getBindingResult().getAllErrors().get(0).getDefaultMessage();
-        String message = String.format("Поле %s %s", field, errorMessage);
 
-        log.error(message);
+        try {
+            String field = Objects.requireNonNull(e.getBindingResult().getFieldError()).getField();
+            String message = String.format("Поле %s %s", field, errorMessage);
 
-        return new ErrorResponse(message);
-    }
+            log.error(message);
 
-    @ExceptionHandler({NotFoundException.class})
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFound(final RuntimeException e) {
-        log.error(e.getMessage());
+            return new ErrorResponse(message);
+        } catch (NullPointerException ex) {
+            log.error(errorMessage);
 
-        return new ErrorResponse(e.getMessage());
+            return new ErrorResponse(errorMessage);
+        }
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)

@@ -55,15 +55,6 @@ public class ErrorHandlerTest {
             LocalDateTime.now());
 
     @Test
-    void badPathVariable() throws Exception {
-        mvc.perform(get("/items/hello")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", "1"))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     void notFound() throws Exception {
         mvc.perform(get("/requests/99")
                         .characterEncoding(StandardCharsets.UTF_8)

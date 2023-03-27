@@ -9,7 +9,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingInputDto;
 import ru.practicum.shareit.booking.dto.BookingState;
-import ru.practicum.shareit.validation.group.Create;
 
 import javax.validation.constraints.Min;
 
@@ -38,7 +37,7 @@ public class BookingController {
 
     @PostMapping
     public ResponseEntity<Object> create(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                         @Validated({Create.class}) @RequestBody BookingInputDto requestDto) {
+                                         @Validated @RequestBody BookingInputDto requestDto) {
         return bookingClient.create(userId, requestDto);
     }
 

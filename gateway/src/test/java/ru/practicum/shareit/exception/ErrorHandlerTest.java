@@ -51,4 +51,13 @@ public class ErrorHandlerTest {
                         .param("size", "-1"))
                 .andExpect(status().isInternalServerError());
     }
+
+    @Test
+    void badPathVariable() throws Exception {
+        mvc.perform(get("/items/hello")
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", "1"))
+                .andExpect(status().isBadRequest());
+    }
 }

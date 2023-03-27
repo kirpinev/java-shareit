@@ -11,7 +11,6 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.BadRequestException;
-import ru.practicum.shareit.exception.IncorrectStateException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -33,18 +32,6 @@ public class BookingServiceImpl implements BookingService {
     public BookingOutputDto create(UserDto userDto, ItemDto itemDto, BookingInputDto bookingInputDto) {
         if (!itemDto.getAvailable()) {
             throw new BadRequestException("Вещь недоступна для бронирования");
-        }
-
-        if (bookingInputDto.getEnd().isBefore(bookingInputDto.getStart())) {
-            throw new BadRequestException("Дата окончания не может быть раньше даты начала");
-        }
-
-        if (bookingInputDto.getStart().isBefore(LocalDateTime.now())) {
-            throw new BadRequestException("Дата начала не может быть раньше текущей даты");
-        }
-
-        if (bookingInputDto.getStart().isEqual(bookingInputDto.getEnd())) {
-            throw new BadRequestException("Дата начала не может быть равна дате окончания");
         }
 
         if (Objects.equals(itemDto.getOwnerId(), userDto.getId())) {
@@ -125,7 +112,7 @@ public class BookingServiceImpl implements BookingService {
                         .toBookingCreatedDto(bookingRepository
                                 .getAllRejectedBookingsByBookerId(bookerId, pageable));
             default:
-                throw new IncorrectStateException("Unknown state: " + state);
+                return null;
         }
     }
 
@@ -162,7 +149,7 @@ public class BookingServiceImpl implements BookingService {
                         .toBookingCreatedDto(bookingRepository
                                 .getAllRejectedBookingsByOwnerId(userId, pageable));
             default:
-                throw new IncorrectStateException("Unknown state: " + state);
+                return null;
         }
     }
 }

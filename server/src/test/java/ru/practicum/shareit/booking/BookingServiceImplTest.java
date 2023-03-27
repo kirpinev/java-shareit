@@ -15,7 +15,6 @@ import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingServiceImpl;
 import ru.practicum.shareit.booking.service.State;
 import ru.practicum.shareit.exception.BadRequestException;
-import ru.practicum.shareit.exception.IncorrectStateException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
@@ -94,20 +93,6 @@ public class BookingServiceImplTest {
             1L,
             start,
             end);
-    private final BookingInputDto bookingInputWrongEndDateDto = new BookingInputDto(
-            1L,
-            start,
-            end.minusDays(2));
-
-    private final BookingInputDto bookingInputWringStartDateDto = new BookingInputDto(
-            1L,
-            start.minusDays(2),
-            end);
-
-    private final BookingInputDto bookingInputEqualDatesDto = new BookingInputDto(
-            1L,
-            start,
-            start);
 
     private final User user = new User(
             1L,
@@ -156,24 +141,6 @@ public class BookingServiceImplTest {
     void createBookingUnavailable() {
         Assertions.assertThrows(BadRequestException.class,
                 () -> bookingService.create(userDto, itemDtoUnavailable, bookingInputDto));
-    }
-
-    @Test
-    void createBookingWrongEndDate() {
-        Assertions.assertThrows(BadRequestException.class,
-                () -> bookingService.create(userDto, itemDto, bookingInputWrongEndDateDto));
-    }
-
-    @Test
-    void createBookingWrongStartDate() {
-        Assertions.assertThrows(BadRequestException.class,
-                () -> bookingService.create(userDto, itemDto, bookingInputWringStartDateDto));
-    }
-
-    @Test
-    void createBookingEqualDates() {
-        Assertions.assertThrows(BadRequestException.class,
-                () -> bookingService.create(userDto, itemDto, bookingInputEqualDatesDto));
     }
 
     @Test
@@ -311,12 +278,6 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void findAllByBookerWrongState() {
-        Assertions.assertThrows(IncorrectStateException.class,
-                () -> bookingService.findAllByBooker(1L, State.UNKNOWN, 0, 1));
-    }
-
-    @Test
     void findAllByOwner() {
         when(bookingRepository.getAllBookingsByOwnerId(1L, PageRequest.of(0, 1)))
                 .thenReturn(List.of(booking));
@@ -387,11 +348,5 @@ public class BookingServiceImplTest {
 
         Assertions.assertEquals(1, bookingsCurrent.size());
 
-    }
-
-    @Test
-    void findAllByOwnerWrongState() {
-        Assertions.assertThrows(IncorrectStateException.class,
-                () -> bookingService.findAllByOwner(1L, State.UNKNOWN, 0, 1));
     }
 }
