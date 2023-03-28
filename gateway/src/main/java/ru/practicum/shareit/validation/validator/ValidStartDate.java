@@ -1,4 +1,4 @@
-package ru.practicum.shareit.booking.dto;
+package ru.practicum.shareit.validation.validator;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
@@ -8,7 +8,7 @@ import java.lang.annotation.*;
 @Constraint(validatedBy = StartDateValidator.class)
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@interface ValidStartDate {
+public @interface ValidStartDate {
 
     String message() default "Дата начала не может быть равна дате окончания";
 

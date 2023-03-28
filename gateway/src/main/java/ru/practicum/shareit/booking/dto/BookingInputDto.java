@@ -3,6 +3,10 @@ package ru.practicum.shareit.booking.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Value;
 import org.springframework.format.annotation.DateTimeFormat;
+import ru.practicum.shareit.validation.group.DefaultValidation;
+import ru.practicum.shareit.validation.group.TimeComparing;
+import ru.practicum.shareit.validation.validator.ValidEndDate;
+import ru.practicum.shareit.validation.validator.ValidStartDate;
 
 import javax.validation.GroupSequence;
 import javax.validation.constraints.FutureOrPresent;

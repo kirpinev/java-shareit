@@ -112,7 +112,7 @@ public class BookingServiceImpl implements BookingService {
                         .toBookingCreatedDto(bookingRepository
                                 .getAllRejectedBookingsByBookerId(bookerId, pageable));
             default:
-                return null;
+                throw new IllegalArgumentException("Unknown state:" + state);
         }
     }
 
@@ -149,7 +149,7 @@ public class BookingServiceImpl implements BookingService {
                         .toBookingCreatedDto(bookingRepository
                                 .getAllRejectedBookingsByOwnerId(userId, pageable));
             default:
-                return null;
+                throw new IllegalArgumentException("Unknown state:" + state);
         }
     }
 }

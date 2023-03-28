@@ -1,4 +1,4 @@
-package ru.practicum.shareit.booking.dto;
+package ru.practicum.shareit.validation.validator;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
@@ -8,7 +8,7 @@ import java.lang.annotation.*;
 @Constraint(validatedBy = EndDateValidator.class)
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@interface ValidEndDate {
+public @interface ValidEndDate {
 
     String message() default "Дата окончания не может быть раньше даты начала";
 
